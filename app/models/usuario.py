@@ -13,6 +13,6 @@ class Usuario(Base):
     telefone = Column(String(20), nullable=True)
     
     #Descomentar linhas a baixo assim que as classes forem criadas
-    # cartoes = relationship("CartaoCredito", back_populates="usuario")
+    cartoes = relationship("CartaoCredito", back_populates="usuario")
     # enderecos = relationship("Endereco", back_populates="usuario")
     # pedidos = relationship("Pedido", back_populates="usuario")
