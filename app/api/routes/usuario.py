@@ -5,7 +5,7 @@ from app.core.database import SessionLocal
 from app.models.usuario import Usuario
 from app.schemas.usuario import UsuarioCreate, UsuarioResponse
 
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter(prefix="/usuarios", tags=["usuarios"])
 
 def get_db():
     db = SessionLocal()
@@ -18,6 +18,8 @@ def get_db():
 @router.get("/", response_model=List[UsuarioResponse])
 def get_users(db: Session = Depends(get_db)):
     users = db.query(Usuario).all()
+    if not users:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuários não encontrados")
     return users
 
 # GET /users/{id} - Busca um usuário por ID
@@ -25,7 +27,7 @@ def get_users(db: Session = Depends(get_db)):
 def get_user_by_id(id: int, db: Session = Depends(get_db)):
     user = db.query(Usuario).filter(Usuario.id == id).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
     return user
 
 # POST /users - Cria um novo usuário
@@ -42,7 +44,7 @@ def create_user(usuario: UsuarioCreate, db: Session = Depends(get_db)):
 def delete_user(id: int, db: Session = Depends(get_db)):
     user = db.query(Usuario).filter(Usuario.id == id).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
     db.delete(user)
     db.commit()
     return None
