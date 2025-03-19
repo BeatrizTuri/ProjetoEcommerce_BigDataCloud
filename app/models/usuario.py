@@ -14,5 +14,5 @@ class Usuario(Base):
     
     #Descomentar linhas a baixo assim que as classes forem criadas
     cartoes = relationship("CartaoCredito", back_populates="usuario")
-    # enderecos = relationship("Endereco", back_populates="usuario")
+    enderecos = relationship("Endereco", back_populates="usuario")
     # pedidos = relationship("Pedido", back_populates="usuario")
