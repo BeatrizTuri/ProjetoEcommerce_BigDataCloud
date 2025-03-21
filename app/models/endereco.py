@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from app.core.database import Base
+from app.core.sql_db import Base
 
 class Endereco(Base):
     __tablename__ = "enderecos"

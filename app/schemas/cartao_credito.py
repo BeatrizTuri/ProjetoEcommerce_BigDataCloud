@@ -24,4 +24,4 @@ class CartaoCreditoResponse(CartaoCreditoBase):
     id_usuario_cartao: int
 
     class Config:
-        orm_mode = True
+        from_attibutes = True

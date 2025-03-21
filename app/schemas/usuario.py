@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
+from app.schemas.cartao_credito import CartaoCreditoCreate
 
 class UsuarioBase(BaseModel):
     nome: str
@@ -10,10 +11,10 @@ class UsuarioBase(BaseModel):
     telefone: Optional[str] = None
 
 class UsuarioCreate(UsuarioBase):
-    pass
+    cartao_credito: Optional[CartaoCreditoCreate] = None
 
 class UsuarioResponse(UsuarioBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True

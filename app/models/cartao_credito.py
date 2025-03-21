@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, DECIMAL, ForeignKey
 from sqlalchemy.orm import relationship
-from app.core.database import Base
+from app.core.sql_db import Base
 
 class CartaoCredito(Base):
     __tablename__ = "cartao_credito"
