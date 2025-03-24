@@ -1,13 +1,13 @@
 from pydantic import BaseModel
 
 class TipoEnderecoBase(BaseModel):
-    tipo: str  # Apenas o nome do tipo de endereço
+    tipo: str  
 
 class TipoEnderecoCreate(TipoEnderecoBase):
-    pass  # Usado ao criar um novo tipo de endereço
+    pass  
 
 class TipoEnderecoRead(TipoEnderecoBase):
-    id: int  # Inclui o ID ao retornar um tipo de endereço
+    id: int  
 
     class Config:
-        from_attributes = True  # Permite conversão automática do SQLAlchemy
+        from_attributes = True  

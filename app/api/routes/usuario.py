@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.core.sql_db import SessionLocal
 from app.models.cartao_credito import CartaoCredito
-# from app.models.endereco import Endereco
 from app.models.usuario import Usuario
 from app.schemas.usuario import UsuarioCreate, UsuarioResponse
 
