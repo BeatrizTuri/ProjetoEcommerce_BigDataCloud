@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-from app.core.database import SessionLocal
+from app.core.sql_db import SessionLocal
+from app.models.cartao_credito import CartaoCredito
 from app.models.usuario import Usuario
 from app.schemas.usuario import UsuarioCreate, UsuarioResponse
 
@@ -30,13 +31,23 @@ def get_user_by_id(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
     return user
 
-# POST /users - Cria um novo usuário
+# POST /users - Cria um novo usuário e opcionalmente um cartão de crédito
 @router.post("/", response_model=UsuarioResponse, status_code=status.HTTP_201_CREATED)
 def create_user(usuario: UsuarioCreate, db: Session = Depends(get_db)):
-    new_user = Usuario(**usuario.dict())
+    new_user = Usuario(**usuario.model_dump(exclude={"cartao_credito"}))
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
+    # Criar o cartão se foi enviado no payload
+    if usuario.cartao_credito:
+        novo_cartao = CartaoCredito(
+            **usuario.cartao_credito.model_dump(),
+            id_usuario_cartao=new_user.id
+        )
+        db.add(novo_cartao)
+    db.commit()
+
     return new_user
 
 # DELETE /users/{id} - Deleta um usuário

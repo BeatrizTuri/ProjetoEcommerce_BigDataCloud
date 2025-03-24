@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import datetime
 from uuid import uuid4
-from app.core.database import SessionLocal
+from app.core.sql_db import SessionLocal
 from app.models.cartao_credito import CartaoCredito
 from app.models.usuario import Usuario
 from app.schemas.cartao_credito import CartaoCreditoCreate, CartaoCreditoResponse
@@ -26,7 +26,7 @@ def create_cartao(id_user: int, cartao: CartaoCreditoCreate, db: Session = Depen
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
     
     # Cria o cartão, associando o id do usuário
-    novo_cartao = CartaoCredito(**cartao.dict(), id_usuario_cartao=id_user)
+    novo_cartao = CartaoCredito(**cartao.model_dump(), id_usuario_cartao=id_user)
     db.add(novo_cartao)
     db.commit()
     db.refresh(novo_cartao)
