@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.core.sql_db import SessionLocal
 from app.models.cartao_credito import CartaoCredito
+# from app.models.endereco import Endereco
 from app.models.usuario import Usuario
 from app.schemas.usuario import UsuarioCreate, UsuarioResponse
 
@@ -31,7 +32,7 @@ def get_user_by_id(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
     return user
 
-# POST /users - Cria um novo usuário
+# POST /users - Cria um novo usuário e opcionalmente um cartão de crédito
 @router.post("/", response_model=UsuarioResponse, status_code=status.HTTP_201_CREATED)
 def create_user(usuario: UsuarioCreate, db: Session = Depends(get_db)):
     new_user = Usuario(**usuario.model_dump(exclude={"cartao_credito"}))
@@ -46,8 +47,7 @@ def create_user(usuario: UsuarioCreate, db: Session = Depends(get_db)):
             id_usuario_cartao=new_user.id
         )
         db.add(novo_cartao)
-        db.commit()
-        db.refresh(novo_cartao)
+    db.commit()
 
     return new_user
 
