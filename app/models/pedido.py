@@ -11,4 +11,4 @@ class Pedido(Base):
     status = Column(String(20), default="pendente")
 
     usuario = relationship("Usuario", back_populates="pedidos")
-    itens = relationship("ItemPedido", back_populates="pedido")
+    produtos = relationship("ProdutoPedido", back_populates="pedido")

@@ -2,25 +2,25 @@ from pydantic import BaseModel
 from typing import List
 from decimal import Decimal
 
-class ItemPedidoBase(BaseModel):
-    id_produto: str  # ID do produto no CosmosDB
+class ProdutoPedidoBase(BaseModel):
+    id_produto: str  
     quantidade: int
 
-class ItemPedidoCreate(ItemPedidoBase):
+class ProdutoPedidoCreate(ProdutoPedidoBase):
     pass
 
-class ItemPedidoRead(ItemPedidoBase):
+class ProdutoPedidoRead(ProdutoPedidoBase):
     preco_unitario: Decimal
 
 class PedidoCreate(BaseModel):
     id_usuario: str
-    itens: List[ItemPedidoCreate]
+    produtos: List[ProdutoPedidoCreate]
 
 class PedidoRead(PedidoCreate):
     id: str
     valor_total: Decimal
     status: str
-    itens: List[ItemPedidoRead]
+    produtos: List[ProdutoPedidoRead]
 
     class Config:
         from_attributes = True
