@@ -1,4 +1,4 @@
-from app.core.database import container_usuarios
+from app.core.sql_db import container_usuarios
 from app import schemas
 from fastapi import HTTPException
 import uuid
