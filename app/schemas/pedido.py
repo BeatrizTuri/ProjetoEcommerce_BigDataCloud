@@ -23,4 +23,4 @@ class PedidoRead(PedidoCreate):
     itens: List[ItemPedidoRead]
 
     class Config:
-        orm_mode = True
+        from_attributes = True

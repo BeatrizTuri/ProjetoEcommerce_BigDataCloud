@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, ForeignKey, DECIMAL, String
 from sqlalchemy.orm import relationship
-from app.core.database import Base
+from app.core.sql_db import Base
 
 class Pedido(Base):
     __tablename__ = "pedidos"

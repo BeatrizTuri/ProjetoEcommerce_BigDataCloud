@@ -1,10 +1,12 @@
 from fastapi import FastAPI
-from app.api.routes import cartao, usuario 
+from app.api.routes import usuario, cartao, endereco
 
 app = FastAPI()
 
 app.include_router(usuario.router)
 app.include_router(cartao.router)
+app.include_router(endereco.router)
+# app.include_router(produto.router)
 
 if __name__ == "__main__":
     import uvicorn
