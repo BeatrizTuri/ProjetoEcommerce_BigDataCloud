@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, DECIMAL, ForeignKey
+from sqlalchemy import Column, Date, Integer, String, DECIMAL, ForeignKey
 from sqlalchemy.orm import relationship
 from app.core.sql_db import Base
 
@@ -6,9 +6,9 @@ class CartaoCredito(Base):
     __tablename__ = "cartao_credito"
     
     id = Column(Integer, primary_key=True, index=True)
-    numero = Column(String(45), nullable=False, unique=True)
-    dtExpiracao = Column(DateTime, nullable=False)
-    cvv = Column(String(3), nullable=False)
+    numero = Column(Integer, nullable=False, unique=True)
+    dtExpiracao = Column(Date, nullable=False)
+    cvv = Column(Integer, nullable=False)
     saldo = Column(DECIMAL(15, 2), nullable=False)
     id_usuario_cartao = Column(Integer, ForeignKey("usuario.id"), nullable=False)
     
