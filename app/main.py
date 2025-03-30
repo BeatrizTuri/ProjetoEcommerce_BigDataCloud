@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.routes import usuario, cartao, endereco
+from app.api.routes import produto, usuario, cartao, endereco
 from app.core.sql_db import Base, engine
 from app.core.cosmos_db import (
     get_cosmos_client, 
@@ -28,7 +28,7 @@ async def startup_event():
 app.include_router(usuario.router)
 app.include_router(cartao.router)
 app.include_router(endereco.router)
-# app.include_router(produto.router)
+app.include_router(produto.router)
 
 if __name__ == "__main__":
     import uvicorn
