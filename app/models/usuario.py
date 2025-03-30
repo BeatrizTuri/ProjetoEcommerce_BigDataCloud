@@ -15,10 +15,10 @@ class Usuario(Base):
     @validates("cpf")
     def validar_cpf(self,key,value):
         if not value.isdigit() or len(value) != 11:
-            raise ValueError("CPF pode ter somente 11 digitos")
+            raise ValueError("CPF pode ter somente 11 numeros")
         return value
     
     #Descomentar linhas a baixo assim que as classes forem criadas
-    cartoes = relationship("CartaoCredito", back_populates="usuario")
-    enderecos = relationship("Endereco", back_populates="usuario")
+    cartoes = relationship("CartaoCredito", back_populates="usuario", cascade="all, delete-orphan")
+    enderecos = relationship("Endereco", back_populates="usuario",cascade="all,delete-orphan")
     # pedidos = relationship("Pedido", back_populates="usuario")
