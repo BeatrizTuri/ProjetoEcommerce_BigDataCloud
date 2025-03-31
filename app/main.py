@@ -29,6 +29,7 @@ app.include_router(cartao.router)
 app.include_router(endereco.router)
 app.include_router(produto.router)
 app.include_router(pedido.router)  
+app.include_router(carrinho.router)
 
 if __name__ == "__main__":
     import uvicorn
