@@ -1,7 +1,8 @@
 from azure.cosmos import CosmosClient, exceptions
 import os
-import uuid
+from pytest import Session
 from app.core.cosmos_db import get_cosmos_container
+from app.services.cosmos_pedido import create_pedido
 from app.services.cosmos_product import get_product_by_id
 
 COSMOS_DB_URI = os.getenv("AZURE_COSMOS_URI")
@@ -20,7 +21,10 @@ def get_cart(id_usuario):
         return {"id_usuario": id_usuario, "produtos": []}
 
 def save_cart(cart):
+    if "id" not in cart:
+        cart["id"] = cart["id_usuario"]
     cart_container.upsert_item(cart)
+
 
 def add_to_cart(id_usuario: str, item: dict):
     cart = get_cart(id_usuario)
@@ -51,8 +55,19 @@ def clear_cart(id_usuario: str):
     save_cart(cart)
     return cart
 
-def finalize_cart(id_usuario: str):
+def finalize_cart(id_usuario: str, db: Session):
     cart = get_cart(id_usuario)
+
     if not cart["produtos"]:
         raise Exception("Carrinho está vazio.")
-    return cart["produtos"]
+
+    pedido = {
+        "id_usuario": id_usuario,
+        "produtos": cart["produtos"]
+    }
+
+    pedido_finalizado = create_pedido(pedido, db=db)
+
+    clear_cart(id_usuario)
+
+    return pedido_finalizado

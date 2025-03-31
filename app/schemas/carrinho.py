@@ -4,7 +4,7 @@ from typing import List, Optional
 class ItemCarrinho(BaseModel):
     id_produto: str
     quantidade: int = Field(..., gt=0, description="A quantidade deve ser maior que zero.")
-    categoria: Optional[str] = None  # Preenchida automaticamente no backend
+    categoria: Optional[str] = None  
 
     @validator("id_produto")
     def id_produto_nao_vazio(cls, v):
