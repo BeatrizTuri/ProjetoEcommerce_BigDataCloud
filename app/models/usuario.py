@@ -12,11 +12,5 @@ class Usuario(Base):
     cpf = Column(String(11), nullable=False, unique=True)
     telefone = Column(String(20), nullable=True)
     
-    @validates("cpf")
-    def validar_cpf(self,key,value):
-        if not value.isdigit() or len(value) != 11:
-            raise ValueError("CPF pode ter somente 11 numeros")
-        return value
-    
     cartoes = relationship("CartaoCredito", back_populates="usuario", cascade="all, delete-orphan")
     enderecos = relationship("Endereco", back_populates="usuario",cascade="all,delete-orphan")
