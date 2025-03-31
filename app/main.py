@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.routes import produto, usuario, cartao, endereco
+from app.api.routes import produto, usuario, cartao, endereco, pedido  
 from app.core.sql_db import Base, engine
 from app.core.cosmos_db import (
     get_cosmos_client, 
@@ -9,7 +9,6 @@ from app.core.cosmos_db import (
     COSMOS_CONTAINER_PEDIDOS
 )
 
-# Cria as tabelas automaticamente se elas não existirem
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -29,6 +28,7 @@ app.include_router(usuario.router)
 app.include_router(cartao.router)
 app.include_router(endereco.router)
 app.include_router(produto.router)
+app.include_router(pedido.router)  
 
 if __name__ == "__main__":
     import uvicorn
