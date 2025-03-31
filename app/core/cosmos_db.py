@@ -26,11 +26,10 @@ def get_cosmos_database(client: CosmosClient):
     database = client.create_database_if_not_exists(id=COSMOS_DATABASE)
     return database
 
-def get_cosmos_container(database, container_name: str):
-    """Cria ou obtém o container (coleção) configurado com base no nome passado."""
+def get_cosmos_container(database, container_name: str, partition_path="/id"):
     container = database.create_container_if_not_exists(
         id=container_name,
-        partition_key=PartitionKey(path="/id"),
+        partition_key=PartitionKey(path=partition_path),
         offer_throughput=400
     )
     return container
