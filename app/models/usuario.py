@@ -18,7 +18,5 @@ class Usuario(Base):
             raise ValueError("CPF pode ter somente 11 numeros")
         return value
     
-    #Descomentar linhas a baixo assim que as classes forem criadas
     cartoes = relationship("CartaoCredito", back_populates="usuario", cascade="all, delete-orphan")
     enderecos = relationship("Endereco", back_populates="usuario",cascade="all,delete-orphan")
-    # pedidos = relationship("Pedido", back_populates="usuario")
