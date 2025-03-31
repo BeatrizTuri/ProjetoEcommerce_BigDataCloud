@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Date, Integer, String
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship,validates
 from app.core.sql_db import Base
 
 class Usuario(Base):
@@ -12,7 +12,13 @@ class Usuario(Base):
     cpf = Column(String(11), nullable=False, unique=True)
     telefone = Column(String(20), nullable=True)
     
+    @validates("cpf")
+    def validar_cpf(self,key,value):
+        if not value.isdigit() or len(value) != 11:
+            raise ValueError("CPF pode ter somente 11 numeros")
+        return value
+    
     #Descomentar linhas a baixo assim que as classes forem criadas
-    cartoes = relationship("CartaoCredito", back_populates="usuario")
-    enderecos = relationship("Endereco", back_populates="usuario")
+    cartoes = relationship("CartaoCredito", back_populates="usuario", cascade="all, delete-orphan")
+    enderecos = relationship("Endereco", back_populates="usuario",cascade="all,delete-orphan")
     # pedidos = relationship("Pedido", back_populates="usuario")
