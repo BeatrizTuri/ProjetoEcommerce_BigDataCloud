@@ -66,6 +66,11 @@ def update_user(id: int, usuario_update: UsuarioUpdate, db: Session = Depends(ge
     user = db.query(Usuario).filter(Usuario.id == id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
+    if usuario_update.email:
+        existing_user = db.query(Usuario).filter(Usuario.email == usuario_update.email).first()
+        if existing_user and existing_user.id != id:  # Email exists for another user
+            print("Este email ja esta sendo usado")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="E-mail já está em uso.")
     #Update only the provided fields
     for field, value in usuario_update.model_dump(exclude_unset= True).items():
         setattr(user,field,value)
