@@ -1,6 +1,7 @@
 from azure.cosmos import CosmosClient, exceptions
 import os
 import uuid
+from app.core.cosmos_db import get_cosmos_container
 from app.services.cosmos_product import get_product_by_id
 
 COSMOS_DB_URI = os.getenv("AZURE_COSMOS_URI")
@@ -10,7 +11,7 @@ CART_CONTAINER_NAME = os.getenv("AZURE_COSMOS_CONTAINER_CARRINHO", "carrinhos")
 
 client = CosmosClient(COSMOS_DB_URI, credential=COSMOS_DB_KEY)
 database = client.create_database_if_not_exists(DATABASE_NAME)
-cart_container = database.create_container_if_not_exists(id=CART_CONTAINER_NAME, partition_key="/id_usuario")
+cart_container = get_cosmos_container(database, CART_CONTAINER_NAME, partition_path="/id_usuario")
 
 def get_cart(id_usuario):
     try:
