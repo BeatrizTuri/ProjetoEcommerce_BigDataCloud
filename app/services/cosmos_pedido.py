@@ -2,8 +2,9 @@ from azure.cosmos import CosmosClient, exceptions
 import os
 import uuid
 from app.services.cosmos_product import get_product_by_id  
+from app.models.cartao_credito import CartaoCredito
+from app.models.usuario import Usuario
 
-# Configurações do Cosmos DB
 COSMOS_DB_URI = os.getenv("AZURE_COSMOS_URI")
 COSMOS_DB_KEY = os.getenv("AZURE_COSMOS_KEY")
 DATABASE_NAME = os.getenv("AZURE_COSMOS_DATABASE")
@@ -13,11 +14,19 @@ client = CosmosClient(COSMOS_DB_URI, credential=COSMOS_DB_KEY)
 database = client.create_database_if_not_exists(DATABASE_NAME)
 container = database.create_container_if_not_exists(id=CONTAINER_NAME, partition_key="/id")
 
-def create_pedido(pedido: dict):
+def create_pedido(pedido: dict, db):
     pedido_id = pedido.get("id", str(uuid.uuid4()))
-    
     produtos_final = []
     valor_total = 0
+
+    cartao = db.query(CartaoCredito).filter(CartaoCredito.id_usuario_cartao == pedido["id_usuario"]).first()
+    
+    usuario = db.query(Usuario).filter(Usuario.id == pedido["id_usuario"]).first()
+    if not usuario:
+        raise Exception("Usuário não encontrado.")
+
+    if not cartao:
+        raise Exception("Cartão de crédito do usuário não encontrado.")
 
     for item in pedido["produtos"]:
         produto_info = get_product_by_id(item["id_produto"])
@@ -37,12 +46,18 @@ def create_pedido(pedido: dict):
 
         valor_total += subtotal
 
+    if cartao.saldo < valor_total:
+        raise Exception("Saldo insuficiente no cartão de crédito.")
+
+    cartao.saldo -= valor_total
+    db.commit()
+
     pedido_completo = {
         "id": pedido_id,
         "id_usuario": pedido["id_usuario"],
         "produtos": produtos_final,
         "valor_total": valor_total,
-        "status": "pendente"
+        "status": "confirmado"
     }
 
     container.create_item(body=pedido_completo)
