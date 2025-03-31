@@ -1,26 +1,34 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
 from decimal import Decimal
+import uuid
 
-class ProdutoPedidoBase(BaseModel):
-    id_produto: str  
+class ItemPedidoBase(BaseModel):
+    id_produto: str
     quantidade: int
+    categoria: str
 
-class ProdutoPedidoCreate(ProdutoPedidoBase):
+class ItemPedidoCreate(ItemPedidoBase):
     pass
 
-class ProdutoPedidoRead(ProdutoPedidoBase):
+class ItemPedidoResponse(ItemPedidoBase):
     preco_unitario: Decimal
 
-class PedidoCreate(BaseModel):
+class PedidoBase(BaseModel):
     id_usuario: str
-    produtos: List[ProdutoPedidoCreate]
+    produtos: List[ItemPedidoCreate]
 
-class PedidoRead(PedidoCreate):
-    id: str
+    def to_dict(self):
+        return {**self.model_dump(), "id": str(uuid.uuid4())}
+
+class PedidoCreate(PedidoBase):
+    pass
+
+class PedidoResponse(PedidoBase):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     valor_total: Decimal
-    status: str
-    produtos: List[ProdutoPedidoRead]
+    status: str = "pendente"
+    produtos: List[ItemPedidoResponse]
 
     class Config:
         from_attributes = True
