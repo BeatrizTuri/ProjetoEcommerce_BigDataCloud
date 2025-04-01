@@ -1,3 +1,4 @@
+from datetime import datetime
 from azure.cosmos import CosmosClient, exceptions
 import os
 import uuid
@@ -18,7 +19,8 @@ container = database.create_container_if_not_exists(id=CONTAINER_NAME, partition
 def create_pedido(pedido: dict, db):
     pedido_id = pedido.get("id", str(uuid.uuid4()))
     produtos_final = []
-    valor_total = Decimal("0.0")  
+    valor_total = Decimal("0.0")
+    data_pedido = datetime.now()
 
     usuario = db.query(Usuario).filter(Usuario.id == pedido["id_usuario"]).first()
     if not usuario:
@@ -30,18 +32,18 @@ def create_pedido(pedido: dict, db):
 
     for item in pedido["produtos"]:
         produto_info = get_product_by_id(item["id_produto"])
-
         if not produto_info:
             raise Exception(f"Produto {item['id_produto']} não encontrado.")
 
-        preco_unitario = Decimal(str(produto_info["price"])) 
+        preco_unitario = Decimal(str(produto_info["price"]))
         subtotal = preco_unitario * item["quantidade"]
 
         produtos_final.append({
             "id_produto": item["id_produto"],
             "quantidade": item["quantidade"],
             "categoria": produto_info["productCategory"],
-            "preco_unitario": float(preco_unitario) 
+            "preco_unitario": float(preco_unitario),
+            "data": data_pedido.isoformat()
         })
 
         valor_total += subtotal
@@ -56,8 +58,9 @@ def create_pedido(pedido: dict, db):
         "id": pedido_id,
         "id_usuario": pedido["id_usuario"],
         "produtos": produtos_final,
-        "valor_total": float(valor_total),  
-        "status": "confirmado"
+        "valor_total": float(valor_total),
+        "status": "confirmado",
+        "data_pedido": data_pedido.isoformat()
     }
 
     container.create_item(body=pedido_completo)

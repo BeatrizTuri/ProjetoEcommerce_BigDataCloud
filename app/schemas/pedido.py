@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, Field
 from typing import List
 from decimal import Decimal
@@ -7,6 +8,7 @@ class ItemPedidoBase(BaseModel):
     id_produto: str
     quantidade: int
     categoria: str
+    data: datetime = Field(default_factory=datetime.now)
 
 class ItemPedidoCreate(ItemPedidoBase):
     pass
