@@ -23,7 +23,7 @@ class CartaoCredito(Base):
     
     # @validates("cvv")
     # def validar_cvv(self,key,value):
-    #     if not value.isdigit() or len(value) != 3:
+    #     if not value.isdigit() or len(value) != 3:0
     #         raise ValueError("O cvv só pode ter 3 numeros, o cartão não foi criado")
     
     

@@ -5,7 +5,7 @@ from app.core.sql_db import SessionLocal
 from app.models.cartao_credito import CartaoCredito
 from app.models.usuario import Usuario
 from app.schemas.usuario import UsuarioCreate, UsuarioResponse
-
+from app.schemas.alterar_usuario import UsuarioUpdate
 router = APIRouter(prefix="/usuarios", tags=["usuarios"])
 
 def get_db():
@@ -59,3 +59,21 @@ def delete_user(id: int, db: Session = Depends(get_db)):
     db.delete(user)
     db.commit()
     return None
+
+#ALTERAR /users/{id} - Altera informação de um usuário
+@router.patch("/{id}", response_model=UsuarioResponse)
+def update_user(id: int, usuario_update: UsuarioUpdate, db: Session = Depends(get_db)):
+    user = db.query(Usuario).filter(Usuario.id == id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
+    if usuario_update.email:
+        existing_user = db.query(Usuario).filter(Usuario.email == usuario_update.email).first()
+        if existing_user and existing_user.id != id:  # Email exists for another user
+            print("Este email ja esta sendo usado")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="E-mail já está em uso.")
+    #Update only the provided fields
+    for field, value in usuario_update.model_dump(exclude_unset= True).items():
+        setattr(user,field,value)
+    db.commit()
+    db.refresh(user)
+    return user
