@@ -96,5 +96,3 @@ def add_saldo_cartao(id_user: int, id_cartao: int, update_data: CartaoCreditoUpd
     db.commit()
     db.refresh(cartao)
     return cartao
-
-
