@@ -17,12 +17,12 @@ COSMOS_QUERY_METRICS_ENABLED = os.getenv("AZURE_COSMOS_QUERY_METRICS_ENABLED", "
 COSMOS_RESPONSE_DIAGNOSTICS_ENABLED = os.getenv("AZURE_COSMOS_RESPONSE_DIAGNOSTICS_ENABLED", "false").lower() == "true"
 
 def get_cosmos_client():
-    """Cria e retorna um cliente do Cosmos DB configurado."""
+
     client = CosmosClient(COSMOS_URI, COSMOS_KEY)
     return client
 
 def get_cosmos_database(client: CosmosClient):
-    """Cria ou obtém o banco de dados configurado."""
+    
     database = client.create_database_if_not_exists(id=COSMOS_DATABASE)
     return database
 

@@ -15,7 +15,6 @@ def get_db():
     finally:
         db.close()
 
-# GET /users - Lista todos os usuários
 @router.get("/", response_model=List[UsuarioResponse])
 def get_users(db: Session = Depends(get_db)):
     users = db.query(Usuario).all()
@@ -23,7 +22,6 @@ def get_users(db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuários não encontrados")
     return users
 
-# GET /users/{id} - Busca um usuário por ID
 @router.get("/{id}", response_model=UsuarioResponse)
 def get_user_by_id(id: int, db: Session = Depends(get_db)):
     user = db.query(Usuario).filter(Usuario.id == id).first()
@@ -31,7 +29,6 @@ def get_user_by_id(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
     return user
 
-# POST /users - Cria um novo usuário e opcionalmente um cartão de crédito
 @router.post("/", response_model=UsuarioResponse, status_code=status.HTTP_201_CREATED)
 def create_user(usuario: UsuarioCreate, db: Session = Depends(get_db)):
     new_user = Usuario(**usuario.model_dump(exclude={"cartao_credito"}))
@@ -39,7 +36,6 @@ def create_user(usuario: UsuarioCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    # Criar o cartão se foi enviado no payload
     if usuario.cartao_credito:
         novo_cartao = CartaoCredito(
             **usuario.cartao_credito.model_dump(),
@@ -50,7 +46,6 @@ def create_user(usuario: UsuarioCreate, db: Session = Depends(get_db)):
 
     return new_user
 
-# DELETE /users/{id} - Deleta um usuário
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(id: int, db: Session = Depends(get_db)):
     user = db.query(Usuario).filter(Usuario.id == id).first()
@@ -60,7 +55,6 @@ def delete_user(id: int, db: Session = Depends(get_db)):
     db.commit()
     return None
 
-#ALTERAR /users/{id} - Altera informação de um usuário
 @router.patch("/{id}", response_model=UsuarioResponse)
 def update_user(id: int, usuario_update: UsuarioUpdate, db: Session = Depends(get_db)):
     user = db.query(Usuario).filter(Usuario.id == id).first()
@@ -68,10 +62,10 @@ def update_user(id: int, usuario_update: UsuarioUpdate, db: Session = Depends(ge
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
     if usuario_update.email:
         existing_user = db.query(Usuario).filter(Usuario.email == usuario_update.email).first()
-        if existing_user and existing_user.id != id:  # Email exists for another user
+        if existing_user and existing_user.id != id:  
             print("Este email ja esta sendo usado")
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="E-mail já está em uso.")
-    #Update only the provided fields
+
     for field, value in usuario_update.model_dump(exclude_unset= True).items():
         setattr(user,field,value)
     db.commit()
