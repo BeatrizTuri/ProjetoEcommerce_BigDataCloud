@@ -7,6 +7,7 @@ from app.models.cartao_credito import CartaoCredito
 from app.models.usuario import Usuario
 from app.schemas.cartao_credito import CartaoCreditoCreate, CartaoCreditoResponse
 from app.schemas.transacao import TransacaoRequest, TransacaoResponse
+from app.schemas.alterar_saldo import CartaoCreditoUpdateSaldo
 
 router = APIRouter(prefix="/credit_card/{id_user}", tags=["cartao"])
 
@@ -83,3 +84,17 @@ def authorize_transacao(id_user: int, request: TransacaoRequest, db: Session = D
         message="Compra autorizada",
         codigoAutorizacao=uuid4()
     )
+    
+@router.patch("/{id_cartao}/saldo", response_model=CartaoCreditoResponse)
+def add_saldo_cartao(id_user: int, id_cartao: int, update_data: CartaoCreditoUpdateSaldo, db: Session = Depends(get_db)):
+    cartao = db.query(CartaoCredito).filter(CartaoCredito.id == id_cartao,CartaoCredito.id_usuario_cartao == id_user).first()
+    if not cartao:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cartão não encontrado para este usuário")
+    if update_data.saldo <= 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="O valor deve ser positivo.")
+    cartao.saldo += update_data.saldo
+    db.commit()
+    db.refresh(cartao)
+    return cartao
+
+
