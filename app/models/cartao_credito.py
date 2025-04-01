@@ -13,18 +13,3 @@ class CartaoCredito(Base):
     id_usuario_cartao = Column(Integer, ForeignKey("usuario.id"), nullable=False)
     
     usuario = relationship("Usuario", back_populates="cartoes")
-
-
-    # @validates("numero")
-    # def validar_numero(self,key,value):
-    #     if not value.isdigit() or len(value) != 16:
-    #         raise ValueError("Numero do cartão só pode ter 16 numeros, o cartão não foi criado")
-    #     return value
-    
-    # @validates("cvv")
-    # def validar_cvv(self,key,value):
-    #     if not value.isdigit() or len(value) != 3:0
-    #         raise ValueError("O cvv só pode ter 3 numeros, o cartão não foi criado")
-    
-    
-    
