@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware 
 from app.api.routes import carrinho, produto, usuario, cartao, endereco, pedido  
 from app.core.sql_db import Base, engine
 from app.core.cosmos_db import (
@@ -12,6 +13,14 @@ from app.core.cosmos_db import (
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.on_event("startup")
 async def startup_event():
