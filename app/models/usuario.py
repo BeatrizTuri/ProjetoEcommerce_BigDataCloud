@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Date, Integer, String
-from sqlalchemy.orm import relationship,validates
+from sqlalchemy.orm import relationship
 from app.core.sql_db import Base
 
 class Usuario(Base):
