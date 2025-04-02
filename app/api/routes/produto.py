@@ -1,7 +1,9 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from typing import List
 from app.schemas.produto import ProdutoCreate, ProdutoResponse
-from app.services.cosmos_product import create_product, get_product_by_id, list_products, delete_product_by_id
+from app.services.cosmos_product import create_product, get_product_by_id, list_products, delete_product_by_id,update_product
+from app.schemas.alterar_produto import ProdutoUpdate
+
 
 router = APIRouter(prefix="/products", tags=["products"])
 
@@ -41,3 +43,23 @@ def delete_produto(id: str):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
     delete_product_by_id(id)
     return None
+
+@router.patch("/{id}", response_model=ProdutoResponse)
+def update_produto(id: str, produto_update: ProdutoUpdate):
+    # Get the existing product by ID
+    product = get_product_by_id(id)
+    if not product:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
+
+    # Get a dictionary of all updated fields (exclude_unset ensures only provided fields are included)
+    update_fields = produto_update.model_dump(exclude_unset=True)
+
+    for field, value in update_fields.items():
+        product[field] = value
+    
+    try:
+        updated_product = update_product(id, product)  # Pass the dictionary to the update_product function
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Erro ao atualizar produto no Cosmos DB: {str(e)}")
+    
+    return updated_product
