@@ -9,10 +9,9 @@ load_dotenv()
 COSMOS_URI = os.getenv("AZURE_COSMOS_URI", "https://localhost:8081")
 COSMOS_KEY = os.getenv("AZURE_COSMOS_KEY", "C2y6yDjf5/R+ob0N8A7Cgv30VR==")
 COSMOS_DATABASE = os.getenv("AZURE_COSMOS_DATABASE", "ecommerce")
-# Container para produtos (padrão)
 COSMOS_CONTAINER_PRODUTOS = os.getenv("AZURE_COSMOS_CONTAINER", "produtos")
-# Novo container para pedidos
 COSMOS_CONTAINER_PEDIDOS = os.getenv("AZURE_COSMOS_CONTAINER_PEDIDOS", "pedidos")
+COSMOS_CONTAINER_CARRINHO = os.getenv("AZURE_COSMOS_CONTAINER_CARRINHO", "carrinho")
 COSMOS_QUERY_METRICS_ENABLED = os.getenv("AZURE_COSMOS_QUERY_METRICS_ENABLED", "false").lower() == "true"
 COSMOS_RESPONSE_DIAGNOSTICS_ENABLED = os.getenv("AZURE_COSMOS_RESPONSE_DIAGNOSTICS_ENABLED", "false").lower() == "true"
 
