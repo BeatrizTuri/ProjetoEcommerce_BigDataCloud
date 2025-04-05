@@ -10,7 +10,7 @@ from app.schemas.cartao_credito import CartaoCreditoCreate, CartaoCreditoRespons
 from app.schemas.transacao import TransacaoRequest, TransacaoResponse
 from app.schemas.alterar_saldo import CartaoCreditoUpdateSaldo
 
-router = APIRouter(prefix="/cartao_de_credito/{id_usuario}", tags=["Cartao"])
+router = APIRouter(prefix="/cartao_de_credito/{id_usuario}", tags=["Cartão"])
 
 def get_db():
     db = SessionLocal()
@@ -38,9 +38,7 @@ def criar_cartao(id_usuario: int, cartao: CartaoCreditoCreate, db: Session = Dep
 
 @router.get("/", response_model=List[CartaoCreditoResponse])
 def listar_cartoes(id_usuario: int, db: Session = Depends(get_db)):
-    """
-    Lista todos os cartões de crédito associados a um usuário.
-    """
+
     usuario = db.query(Usuario).filter(Usuario.id == id_usuario).first()
     if not usuario:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")

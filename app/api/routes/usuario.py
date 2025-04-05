@@ -6,7 +6,7 @@ from app.models.cartao_credito import CartaoCredito
 from app.models.usuario import Usuario
 from app.schemas.usuario import UsuarioCreate, UsuarioResponse
 from app.schemas.alterar_usuario import UsuarioUpdate
-router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
+router = APIRouter(prefix="/usuarios", tags=["Usuários"])
 
 def get_db():
     db = SessionLocal()
