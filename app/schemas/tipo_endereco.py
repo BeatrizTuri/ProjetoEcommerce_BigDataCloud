@@ -6,7 +6,7 @@ class TipoEnderecoBase(BaseModel):
 class TipoEnderecoCreate(TipoEnderecoBase):
     pass  
 
-class TipoEnderecoRead(TipoEnderecoBase):
+class TipoEnderecoResponse(TipoEnderecoBase):
     id: int  
 
     class Config:

@@ -3,7 +3,7 @@ from azure.cosmos import CosmosClient, exceptions
 import os
 import uuid
 from decimal import Decimal  # <-- Adicionado
-from app.services.cosmos_product import get_product_by_id  
+from app.services.cosmos_product import obter_produto_por_id
 from app.models.cartao_credito import CartaoCredito
 from app.models.usuario import Usuario
 
@@ -31,7 +31,7 @@ def create_pedido(pedido: dict, db):
         raise Exception("Cartão de crédito do usuário não encontrado.")
 
     for item in pedido["produtos"]:
-        produto_info = get_product_by_id(item["id_produto"])
+        produto_info = obter_produto_por_id(item["id_produto"])
         if not produto_info:
             raise Exception(f"Produto {item['id_produto']} não encontrado.")
 

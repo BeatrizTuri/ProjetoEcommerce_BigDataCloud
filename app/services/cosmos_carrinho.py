@@ -3,7 +3,8 @@ import os
 from pytest import Session
 from app.core.cosmos_db import get_cosmos_container
 from app.services.cosmos_pedido import create_pedido
-from app.services.cosmos_product import get_product_by_id
+from app.services.cosmos_product import obter_produto_por_id
+
 
 COSMOS_DB_URI = os.getenv("AZURE_COSMOS_URI")
 COSMOS_DB_KEY = os.getenv("AZURE_COSMOS_KEY")
@@ -14,11 +15,38 @@ client = CosmosClient(COSMOS_DB_URI, credential=COSMOS_DB_KEY)
 database = client.create_database_if_not_exists(DATABASE_NAME)
 cart_container = get_cosmos_container(database, CART_CONTAINER_NAME, partition_path="/id_usuario")
 
-def get_cart(id_usuario):
+def get_cart(id_usuario: str) -> dict:
     try:
-        return cart_container.read_item(item=id_usuario, partition_key=id_usuario)
+        cart = cart_container.read_item(item=id_usuario, partition_key=id_usuario)
     except exceptions.CosmosResourceNotFoundError:
-        return {"id_usuario": id_usuario, "produtos": []}
+        cart = {"id_usuario": id_usuario, "produtos": []}
+
+    total = 0.0
+    produtos_atualizados = []
+
+    for item in cart.get("produtos", []):
+        produto_info = obter_produto_por_id(item["id_produto"])
+        if not produto_info:
+            continue  # Ignora produtos inexistentes (ou pode lançar erro)
+
+        preco = produto_info.get("price", 0)
+        subtotal = preco * item["quantidade"]
+
+        produtos_atualizados.append({
+            "id_produto": item["id_produto"],
+            "quantidade": item["quantidade"],
+            "categoria": item.get("categoria", produto_info.get("productCategory")),
+            "preco_unitario": preco,
+            "subtotal": subtotal
+        })
+
+        total += subtotal
+
+    return {
+        "id_usuario": id_usuario,
+        "produtos": produtos_atualizados,
+        "total": round(total, 2)
+    }
 
 def save_cart(cart):
     if "id" not in cart:
@@ -34,7 +62,7 @@ def add_to_cart(id_usuario: str, item: dict):
             prod["quantidade"] += item["quantidade"]
             break
     else:
-        produto_info = get_product_by_id(item["id_produto"])
+        produto_info = obter_produto_por_id(item["id_produto"])
         if not produto_info:
             raise Exception(f"Produto {item['id_produto']} não encontrado.")
         item["categoria"] = produto_info["productCategory"]

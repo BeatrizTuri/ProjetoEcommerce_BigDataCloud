@@ -4,7 +4,9 @@ from typing import List, Optional
 class ItemCarrinho(BaseModel):
     id_produto: str
     quantidade: int = Field(..., gt=0, description="A quantidade deve ser maior que zero.")
-    categoria: Optional[str] = None  
+    categoria: Optional[str] = None
+    preco_unitario: Optional[float] = None
+    subtotal: Optional[float] = None
 
     @validator("id_produto")
     def id_produto_nao_vazio(cls, v):
@@ -15,6 +17,7 @@ class ItemCarrinho(BaseModel):
 class CarrinhoResponse(BaseModel):
     id_usuario: str
     produtos: List[ItemCarrinho]
+    total: Optional[float] = None
 
     @validator("id_usuario")
     def id_usuario_nao_vazio(cls, v):

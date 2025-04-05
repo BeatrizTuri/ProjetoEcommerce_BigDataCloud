@@ -1,65 +1,63 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from typing import List
 from app.schemas.produto import ProdutoCreate, ProdutoResponse
-from app.services.cosmos_product import create_product, get_product_by_id, list_products, delete_product_by_id,update_product
+from app.services.cosmos_product import criar_produto, obter_produto_por_id, listar_produtos, deletar_produto_por_id, atualizar_produto
 from app.schemas.alterar_produto import ProdutoUpdate
 
 
-router = APIRouter(prefix="/products", tags=["products"])
+router = APIRouter(prefix="/produtos", tags=["Produtos"])
 
 @router.post("/batch", response_model=List[ProdutoResponse], status_code=status.HTTP_201_CREATED)
-def create_produtos(produtos: List[ProdutoCreate]):
-    created_items = []
-    errors = []
+def criar_produtos(produtos: List[ProdutoCreate]):
+    itens_criados = []
+    erros = []
     
     for produto in produtos:
         try:
             produto_dict = produto.to_dict()
-            created_item = create_product(produto_dict)
-            created_items.append(created_item)
+            item_criado = criar_produto(produto_dict)
+            itens_criados.append(item_criado)
         except Exception as e:
-            errors.append({"produto": produto.productName, "erro": str(e)})
+            erros.append({"produto": produto.productName, "erro": str(e)})
 
-    if errors:
-        raise HTTPException(status_code=207, detail={"sucesso": created_items, "falhas": errors})
+    if erros:
+        raise HTTPException(status_code=207, detail={"sucesso": itens_criados, "falhas": erros})
 
-    return created_items
+    return itens_criados
 
 @router.get("/{id}", response_model=ProdutoResponse)
-def get_produto(id: str):
-    product = get_product_by_id(id)
-    if not product:
+def obter_produtos(id: str):
+    produto = obter_produto_por_id(id)
+    if not produto:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
-    return product
+    return produto
 
 @router.get("/", response_model=List[ProdutoResponse])
-def get_all_produtos():
-    return list_products()
+def listar_todos_produtos():
+    return listar_produtos()
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_produto(id: str):
-    product = get_product_by_id(id)
-    if not product:
+def deletar_produtos(id: str):
+    produto = obter_produto_por_id(id)
+    if not produto:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
-    delete_product_by_id(id)
+    deletar_produto_por_id(id)
     return None
 
 @router.patch("/{id}", response_model=ProdutoResponse)
-def update_produto(id: str, produto_update: ProdutoUpdate):
-    # Get the existing product by ID
-    product = get_product_by_id(id)
-    if not product:
+def atualizar_produtos(id: str, produto_update: ProdutoUpdate):
+    produto = obter_produto_por_id(id)
+    if not produto:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
 
-    # Get a dictionary of all updated fields (exclude_unset ensures only provided fields are included)
-    update_fields = produto_update.model_dump(exclude_unset=True)
+    campos_atualizados = produto_update.model_dump(exclude_unset=True)
 
-    for field, value in update_fields.items():
-        product[field] = value
+    for campo, valor in campos_atualizados.items():
+        produto[campo] = valor
     
     try:
-        updated_product = update_product(id, product)  # Pass the dictionary to the update_product function
+        produto_atualizado = atualizar_produto(id, produto)  
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Erro ao atualizar produto no Cosmos DB: {str(e)}")
     
-    return updated_product
+    return produto_atualizado

@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.routes import carrinho, produto, usuario, cartao, endereco, pedido  
+from app.api.routes import carrinho, produto, usuario, cartao, endereco, pedido, tipo_endereco
 from app.core.sql_db import Base, engine
 from app.core.cosmos_db import (
     get_cosmos_client, 
@@ -27,6 +27,7 @@ async def startup_event():
 app.include_router(usuario.router)
 app.include_router(cartao.router)
 app.include_router(endereco.router)
+app.include_router(tipo_endereco.router)
 app.include_router(produto.router)
 app.include_router(pedido.router)  
 app.include_router(carrinho.router)

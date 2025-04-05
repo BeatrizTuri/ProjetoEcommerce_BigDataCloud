@@ -1,10 +1,10 @@
 from pydantic import BaseModel, validator
-from datetime import datetime
+from datetime import date
 from decimal import Decimal
 
 class CartaoCreditoBase(BaseModel):
     numero: str
-    dtExpiracao: datetime
+    dtExpiracao: date
     cvv: str
     saldo: Decimal
 

@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.sql_db import SessionLocal
@@ -5,7 +6,7 @@ from app.models.endereco import Endereco
 from app.models.usuario import Usuario
 from app.schemas.endereco import EnderecoCreate, EnderecoRead
 
-router = APIRouter(prefix="/address/{id_user}", tags=["endereco"])
+router = APIRouter(prefix="/endereco/{id_usuario}", tags=["Endereço"])
 
 def get_db():
     db = SessionLocal()
@@ -15,9 +16,9 @@ def get_db():
         db.close()
 
 @router.post("/", response_model=EnderecoRead, status_code=status.HTTP_201_CREATED)
-def create_endereco(id_user: int, endereco: EnderecoCreate, db: Session = Depends(get_db)):
-   
-    usuario = db.query(Usuario).filter(Usuario.id == id_user).first()
+def criar_endereco(id_usuario: int, endereco: EnderecoCreate, db: Session = Depends(get_db)):
+
+    usuario = db.query(Usuario).filter(Usuario.id == id_usuario).first()
     if not usuario:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
     
@@ -32,3 +33,15 @@ def create_endereco(id_user: int, endereco: EnderecoCreate, db: Session = Depend
     db.commit()
     
     return novo_endereco
+
+@router.get("/", response_model=List[EnderecoRead])
+def listar_enderecos(id_usuario: int, db: Session = Depends(get_db)):
+
+    usuario = db.query(Usuario).filter(Usuario.id == id_usuario).first()
+    if not usuario:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
+    
+    if not usuario.enderecos:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nenhum endereço encontrado para este usuário")
+    
+    return usuario.enderecos

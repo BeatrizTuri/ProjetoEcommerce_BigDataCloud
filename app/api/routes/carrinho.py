@@ -9,9 +9,8 @@ from app.services.cosmos_carrinho import (
     clear_cart,
     finalize_cart
 )
-from app.services.cosmos_pedido import create_pedido
 
-router = APIRouter(prefix="/carrinho", tags=["carrinho"])
+router = APIRouter(prefix="/carrinho", tags=["Carrinho"])
 
 @router.get("/{id_usuario}")
 def visualizar_carrinho(id_usuario: str):
