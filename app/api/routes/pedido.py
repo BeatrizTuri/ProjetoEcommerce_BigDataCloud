@@ -5,27 +5,27 @@ from app.api.routes.cartao import get_db
 from app.schemas.pedido import PedidoCreate, PedidoResponse
 from app.services.cosmos_pedido import create_pedido, get_pedido_by_id, list_pedidos, delete_pedido_by_id
 
-router = APIRouter(prefix="/pedidos", tags=["pedidos"])
+router = APIRouter(prefix="/pedidos", tags=["Pedidos"])
 
 @router.post("/", response_model=PedidoResponse)
-def create_new_pedido(pedido: PedidoCreate, db: Session = Depends(get_db)):
+def criar_novo_pedido(pedido: PedidoCreate, db: Session = Depends(get_db)):
     pedido_dict = pedido.to_dict()
-    created_pedido = create_pedido(pedido_dict, db=db)
-    return created_pedido
+    pedido_criado = create_pedido(pedido_dict, db=db)
+    return pedido_criado
 
 @router.get("/{id}", response_model=PedidoResponse)
-def get_pedido(id: str):
+def obter_pedido(id: str):
     pedido = get_pedido_by_id(id)
     if not pedido:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pedido não encontrado")
     return pedido
 
 @router.get("/", response_model=List[PedidoResponse])
-def get_all_pedidos():
+def obter_todos_pedidos():
     return list_pedidos()
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_pedido(id: str):
+def deletar_pedido(id: str):
     pedido = get_pedido_by_id(id)
     if not pedido:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pedido não encontrado")
