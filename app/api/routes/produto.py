@@ -52,12 +52,8 @@ def atualizar_produtos(id: str, produto_update: ProdutoUpdate):
 
     campos_atualizados = produto_update.model_dump(exclude_unset=True)
 
-    print(campos_atualizados)
-
     for campo, valor in campos_atualizados.items():
         produto[campo] = valor
-        print(f"Atualizando campo {campo} para {valor}")
-        
     
     try:
         produto_atualizado = atualizar_produto(id, produto)  
