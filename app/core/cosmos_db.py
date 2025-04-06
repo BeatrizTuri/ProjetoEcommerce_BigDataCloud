@@ -2,10 +2,8 @@ import os
 from dotenv import load_dotenv
 from azure.cosmos import CosmosClient, PartitionKey
 
-# Carrega as variáveis de ambiente do .env
 load_dotenv()
 
-# Configurações do Cosmos DB
 COSMOS_URI = os.getenv("AZURE_COSMOS_URI", "https://localhost:8081")
 COSMOS_KEY = os.getenv("AZURE_COSMOS_KEY", "C2y6yDjf5/R+ob0N8A7Cgv30VR==")
 COSMOS_DATABASE = os.getenv("AZURE_COSMOS_DATABASE", "ecommerce")
