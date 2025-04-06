@@ -18,8 +18,7 @@ client = CosmosClient(COSMOS_URI, COSMOS_KEY)
 database = client.create_database_if_not_exists(id=COSMOS_DATABASE)
 container = database.create_container_if_not_exists(
     id=COSMOS_CONTAINER_CARRINHO,
-    partition_key=PartitionKey(path="/id"),
-    offer_throughput=400
+    partition_key=PartitionKey(path="/id")
 )
 
 def get_cart(id_usuario: str) -> dict:

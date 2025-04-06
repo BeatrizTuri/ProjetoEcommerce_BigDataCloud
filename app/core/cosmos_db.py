@@ -26,7 +26,6 @@ def get_cosmos_database(client: CosmosClient):
 def get_cosmos_container(database, container_name: str, partition_path="/id"):
     container = database.create_container_if_not_exists(
         id=container_name,
-        partition_key=PartitionKey(path=partition_path),
-        offer_throughput=400
+        partition_key=PartitionKey(path=partition_path)
     )
     return container
