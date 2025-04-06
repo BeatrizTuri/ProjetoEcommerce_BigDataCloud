@@ -1,22 +1,26 @@
 from azure.cosmos import CosmosClient, PartitionKey, exceptions
+import os
 from decimal import Decimal
 from datetime import datetime
 import uuid
-
 from app.services.cosmos_product import obter_produto_por_id
 from app.models.cartao_credito import CartaoCredito
 from app.models.usuario import Usuario
 
 from app.core.cosmos_db import (
-    get_cosmos_client,
-    get_cosmos_database,
-    get_cosmos_container,
+    COSMOS_URI,
+    COSMOS_KEY,
+    COSMOS_DATABASE,
     COSMOS_CONTAINER_CARRINHO
 )
 
-client = get_cosmos_client()
-database = get_cosmos_database(client)
-container = get_cosmos_container(database, COSMOS_CONTAINER_CARRINHO)
+client = CosmosClient(COSMOS_URI, COSMOS_KEY)
+database = client.create_database_if_not_exists(id=COSMOS_DATABASE)
+container = database.create_container_if_not_exists(
+    id=COSMOS_CONTAINER_CARRINHO,
+    partition_key=PartitionKey(path="/id"),
+    offer_throughput=400
+)
 
 def get_cart(id_usuario: str) -> dict:
     try:
@@ -98,6 +102,7 @@ def finalize_cart(id_usuario: str, db):
     }
 
     pedido_finalizado = create_pedido(pedido, db=db)
+
     clear_cart(id_usuario)
 
     return pedido_finalizado
