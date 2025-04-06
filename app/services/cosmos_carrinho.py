@@ -8,7 +8,7 @@ from app.services.cosmos_product import obter_produto_por_id
 COSMOS_DB_URI = os.getenv("AZURE_COSMOS_URI")
 COSMOS_DB_KEY = os.getenv("AZURE_COSMOS_KEY")
 DATABASE_NAME = os.getenv("AZURE_COSMOS_DATABASE")
-CART_CONTAINER_NAME = os.getenv("AZURE_COSMOS_CONTAINER_CARRINHO", "carrinhos")
+AZURE_COSMOS_CONTAINER_CARRINHO = os.getenv("AZURE_COSMOS_CONTAINER_CARRINHO")
 
 _cart_container = None
 
@@ -17,7 +17,7 @@ def get_cart_container():
     if _cart_container is None:
         client = CosmosClient(COSMOS_DB_URI, credential=COSMOS_DB_KEY)
         database = client.create_database_if_not_exists(DATABASE_NAME)
-        _cart_container = get_cosmos_container(database, CART_CONTAINER_NAME, partition_path="/id_usuario")
+        _cart_container = get_cosmos_container(database, AZURE_COSMOS_CONTAINER_CARRINHO, partition_path="/id_usuario")
     return _cart_container
 
 
