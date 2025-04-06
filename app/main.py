@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from app.api.routes import carrinho, produto, usuario, cartao, endereco, pedido, tipo_endereco
 from app.core.sql_db import Base, engine
 from app.core.cosmos_db import (
+    COSMOS_CONTAINER_CARRINHO,
     get_cosmos_client, 
     get_cosmos_database, 
     get_cosmos_container,
@@ -17,6 +18,9 @@ app = FastAPI()
 async def startup_event():
     client = get_cosmos_client()
     database = get_cosmos_database(client)
+    
+    carrinho_container = get_cosmos_container(database, COSMOS_CONTAINER_CARRINHO)
+    print(f"Container de carrinho criado ou obtido: {carrinho_container.id}")
     
     produtos_container = get_cosmos_container(database, COSMOS_CONTAINER_PRODUTOS)
     print(f"Container de produtos criado ou obtido: {produtos_container.id}")
