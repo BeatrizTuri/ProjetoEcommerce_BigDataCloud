@@ -18,7 +18,7 @@ database = client.create_database_if_not_exists(id=COSMOS_DATABASE)
 container = database.create_container_if_not_exists(
     id=COSMOS_CONTAINER_PEDIDOS,
     partition_key=PartitionKey(path="/id"),
-    offer_throughput=400
+    offer_throughput=300
 )
 
 def create_pedido(pedido: dict, db):
