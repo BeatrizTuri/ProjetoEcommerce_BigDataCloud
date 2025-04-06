@@ -2,11 +2,11 @@ from fastapi import FastAPI
 from app.api.routes import carrinho, produto, usuario, cartao, endereco, pedido, tipo_endereco
 from app.core.sql_db import Base, engine
 from app.core.cosmos_db import (
-    COSMOS_CONTAINER_CARRINHO,
     get_cosmos_client, 
     get_cosmos_database, 
     get_cosmos_container,
     COSMOS_CONTAINER_PRODUTOS,
+    COSMOS_CONTAINER_CARRINHO,
     COSMOS_CONTAINER_PEDIDOS
 )
 
