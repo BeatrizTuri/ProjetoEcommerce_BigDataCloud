@@ -14,19 +14,19 @@ COSMOS_QUERY_METRICS_ENABLED = os.getenv("AZURE_COSMOS_QUERY_METRICS_ENABLED", "
 COSMOS_RESPONSE_DIAGNOSTICS_ENABLED = os.getenv("AZURE_COSMOS_RESPONSE_DIAGNOSTICS_ENABLED", "false").lower() == "true"
 
 def get_cosmos_client():
-
     client = CosmosClient(COSMOS_URI, COSMOS_KEY)
     return client
 
 def get_cosmos_database(client: CosmosClient):
-    
-    database = client.create_database_if_not_exists(id=COSMOS_DATABASE)
+    database = client.create_database_if_not_exists(
+        id=COSMOS_DATABASE,
+        offer_throughput=1000
+    )
     return database
 
 def get_cosmos_container(database, container_name: str, partition_path="/id"):
     container = database.create_container_if_not_exists(
         id=container_name,
-        partition_key=PartitionKey(path=partition_path),
-        offer_throughput=300
+        partition_key=PartitionKey(path=partition_path)
     )
     return container

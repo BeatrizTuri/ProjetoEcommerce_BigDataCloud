@@ -1,25 +1,22 @@
 from datetime import datetime
-from azure.cosmos import CosmosClient, PartitionKey, exceptions
-import os
+from azure.cosmos import exceptions
 import uuid
 from decimal import Decimal
+
 from app.services.cosmos_product import obter_produto_por_id
 from app.models.cartao_credito import CartaoCredito
 from app.models.usuario import Usuario
+
 from app.core.cosmos_db import (
-    COSMOS_URI,
-    COSMOS_KEY,
-    COSMOS_DATABASE,
+    get_cosmos_client,
+    get_cosmos_database,
+    get_cosmos_container,
     COSMOS_CONTAINER_PEDIDOS
 )
 
-client = CosmosClient(COSMOS_URI, COSMOS_KEY)
-database = client.create_database_if_not_exists(id=COSMOS_DATABASE)
-container = database.create_container_if_not_exists(
-    id=COSMOS_CONTAINER_PEDIDOS,
-    partition_key=PartitionKey(path="/id"),
-    offer_throughput=300
-)
+client = get_cosmos_client()
+database = get_cosmos_database(client)
+container = get_cosmos_container(database, COSMOS_CONTAINER_PEDIDOS)
 
 def create_pedido(pedido: dict, db):
     pedido_id = pedido.get("id", str(uuid.uuid4()))

@@ -1,13 +1,14 @@
-from azure.cosmos import CosmosClient, PartitionKey, exceptions
-from app.core.cosmos_db import COSMOS_URI, COSMOS_KEY, COSMOS_DATABASE, COSMOS_CONTAINER_PRODUTOS
-
-client = CosmosClient(COSMOS_URI, COSMOS_KEY)
-database = client.create_database_if_not_exists(id=COSMOS_DATABASE)
-container = database.create_container_if_not_exists(
-    id=COSMOS_CONTAINER_PRODUTOS,
-    partition_key=PartitionKey(path="/id"),
-    offer_throughput=300
+from azure.cosmos import exceptions
+from app.core.cosmos_db import (
+    get_cosmos_client,
+    get_cosmos_database,
+    get_cosmos_container,
+    COSMOS_CONTAINER_PRODUTOS
 )
+
+client = get_cosmos_client()
+database = get_cosmos_database(client)
+container = get_cosmos_container(database, COSMOS_CONTAINER_PRODUTOS)
 
 def criar_produto(produto: dict) -> dict:
     return container.create_item(body=produto)
@@ -31,7 +32,6 @@ def deletar_produto_por_id(produto_id: str) -> None:
     
 def atualizar_produto(produto_id: str, produto_dict: dict) -> dict:
     try:
-        
         produto_dict['id'] = produto_id 
         container.upsert_item(body=produto_dict) 
         return produto_dict
