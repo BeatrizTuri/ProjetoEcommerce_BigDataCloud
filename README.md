@@ -4,7 +4,6 @@
 IBMEC-MALL é um **mini e-commerce** desenvolvido para a disciplina de **Big Data**. O sistema permite:  
 
 ✅ Cadastro de usuários com cartão de crédito  
-✅ Gerenciamento de produtos (CRUD)  
 ✅ Registro de pedidos com verificação de saldo  
 ✅ Envio de dados para análise no pipeline de Big Data  
 ✅ Relatórios de vendas para administradores  
@@ -21,11 +20,8 @@ IBMEC-MALL é um **mini e-commerce** desenvolvido para a disciplina de **Big Dat
 
 - **Linguagem:** Python  
 - **Framework:** FastAPI  
-- **Banco de Dados:** Azure Cosmos DB (NoSQL) + Azure SQL Database  
-- **Big Data:** Azure Event Hubs + Data Factory  
-- **Relatórios:** Power BI  
+- **Banco de Dados:** Azure Cosmos DB (NoSQL) + Azure SQL Database    
 - **Deploy:** GitHub Actions  
-- **Testes:** Pytest  ]
 
 ### 💡 Tipos de Commit
 
