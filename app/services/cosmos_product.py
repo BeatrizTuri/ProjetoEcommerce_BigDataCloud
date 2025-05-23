@@ -27,6 +27,28 @@ def obter_produto_por_id(produto_id: str) -> dict:
 
 def deletar_produto_por_id(produto_id: str) -> None:
     container.delete_item(item=produto_id, partition_key=produto_id)
+
+def buscar_produtos_por_nome(nome: str) -> list:
+    if not isinstance(nome, str):
+        raise ValueError("O parâmetro 'nome' deve ser uma string.")
+    
+    consulta = """
+    SELECT * FROM c
+    WHERE IS_DEFINED(c.productName) AND CONTAINS(LOWER(c.productName), @nome)
+    """
+    
+    parametros = [
+        {"name": "@nome", "value": nome.lower()}
+    ]
+    
+    itens = list(container.query_items(
+        query=consulta,
+        parameters=parametros,
+        enable_cross_partition_query=True
+    ))
+    
+    return itens
+
     
 def atualizar_produto(produto_id: str, produto_dict: dict) -> dict:
     try:

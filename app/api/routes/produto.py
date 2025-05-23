@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, Query, status, Depends
 from typing import List
 from app.schemas.produto import ProdutoCreate, ProdutoResponse
-from app.services.cosmos_product import criar_produto, obter_produto_por_id, listar_produtos, deletar_produto_por_id, atualizar_produto
+from app.services.cosmos_product import criar_produto, obter_produto_por_id, listar_produtos, deletar_produto_por_id, atualizar_produto, buscar_produtos_por_nome
 from app.schemas.alterar_produto import ProdutoUpdate
 
 
@@ -24,6 +24,13 @@ def criar_produtos(produtos: List[ProdutoCreate]):
         raise HTTPException(status_code=207, detail={"sucesso": itens_criados, "falhas": erros})
 
     return itens_criados
+
+@router.get("/search", response_model=List[ProdutoResponse])
+def buscar_por_nome(nome: str):
+    produtos = buscar_produtos_por_nome(nome)
+    if not produtos:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nenhum produto encontrado com esse nome")
+    return produtos
 
 @router.get("/{id}", response_model=ProdutoResponse)
 def obter_produtos(id: str):
