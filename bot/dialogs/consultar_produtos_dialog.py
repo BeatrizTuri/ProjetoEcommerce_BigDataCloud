@@ -40,7 +40,7 @@ class ConsultarProdutoDialog(ComponentDialog):
 
         if not produtos:
             await step_context.context.send_activity("❌ Nenhum produto encontrado com esse nome.")
-            return await step_context.end_dialog()
+            return await step_context.next(None)
 
         mensagens = []
         for produto in produtos[:3]:
@@ -66,4 +66,4 @@ class ConsultarProdutoDialog(ComponentDialog):
         if step_context.result:
             return await step_context.replace_dialog(self.id)  # Reinicia o diálogo
         await step_context.context.send_activity("✅ Consulta finalizada. Se precisar de algo mais, estou à disposição.")
-        return await step_context.end_dialog()
+        return await step_context.end_dialog("retornar_ao_menu")

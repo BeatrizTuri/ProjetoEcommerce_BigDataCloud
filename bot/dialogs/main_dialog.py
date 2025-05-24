@@ -22,6 +22,7 @@ class MainDialog(ComponentDialog):
                 [
                     self.prompt_option_step,
                     self.process_option_step,
+                    self.final_step,  # novo passo
                 ],
             )
         )
@@ -40,5 +41,14 @@ class MainDialog(ComponentDialog):
         choice = step_context.result.value
         if choice == "Consultar Produtos":
             return await step_context.begin_dialog("ConsultarProdutoDialog")
+        
+    async def final_step(self, step_context: WaterfallStepContext):
+        if step_context.result == "retornar_ao_menu":
+            # Reinicia o diálogo principal para mostrar o menu novamente
+            return await step_context.replace_dialog(self.initial_dialog_id)
+        
+        # Caso nenhum retorno especial, apenas encerra o diálogo
         return await step_context.end_dialog()
+
+
 
