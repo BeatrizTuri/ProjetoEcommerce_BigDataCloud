@@ -44,7 +44,13 @@ class DialogBot(ActivityHandler):
             if member.id == turn_context.activity.recipient.id:
                 await turn_context.send_activity(
                     MessageFactory.text(
-                    f"Seja bem-vindo(a) ao bot de atendimento do IBMEC MALL! " 
-                    f"Digite uma mensagem para iniciar o atendimento."
+                        "👋 Seja bem-vindo(a) ao bot de atendimento do *IBMEC MALL!*"
                     )
                 )
+
+                # Inicia automaticamente o diálogo principal após a mensagem de boas-vindas
+                await DialogHelper.run_dialog(
+                    self.dialog,
+                    turn_context,
+                    self.conversation_state.create_property("DialogState"),
+                    )
