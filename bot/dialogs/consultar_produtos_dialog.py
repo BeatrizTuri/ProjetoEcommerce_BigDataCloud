@@ -2,58 +2,48 @@ import requests
 from botbuilder.dialogs import ComponentDialog, WaterfallDialog, WaterfallStepContext
 from botbuilder.core import MessageFactory
 from botbuilder.dialogs.prompts import TextPrompt, PromptOptions
+from services.product_api import ProductAPI
 
 class ConsultarProdutoDialog(ComponentDialog):
-    def __init__(self):
-        super(ConsultarProdutoDialog, self).__init__("ConsultarProdutoDialog")
+    def __init__(self, product_api: ProductAPI):
+        super().__init__("ConsultarProdutoDialog")
+        self.product_api = product_api
 
         self.add_dialog(TextPrompt(TextPrompt.__name__))
-
         self.add_dialog(
             WaterfallDialog(
                 "consultarProdutoWaterfallDialog",
                 [
-                    self.product_id_step,
-                    self.process_product_id_step,
+                    self.product_name_step,
+                    self.show_product_info_step,
                 ],
             )
         )
-
         self.initial_dialog_id = "consultarProdutoWaterfallDialog"
 
-    async def product_id_step(self, step_context: WaterfallStepContext):
-        prompt_message = MessageFactory.text("Digite o ID do produto que deseja consultar:")
-        return await step_context.prompt(
-            TextPrompt.__name__,
-            PromptOptions(prompt=prompt_message)
-        )
+    async def product_name_step(self, step_context: WaterfallStepContext):
+        prompt_message = MessageFactory.text("Por favor, digite o nome do produto que você deseja consultar.")
+        return await step_context.prompt(TextPrompt.__name__, PromptOptions(prompt=prompt_message))
 
-    async def process_product_id_step(self, step_context: WaterfallStepContext):
-        produto_id = step_context.result
+    async def show_product_info_step(self, step_context: WaterfallStepContext):
+        product_name = step_context.result
+        produtos = self.product_api.consultar_produtos(product_name)
 
-        # URL da API
-        base_url = "http://localhost:8000/produtos"  # substitua pelo endereço real da sua API se necessário
-        endpoint = f"{base_url}/{produto_id}"
+        if not produtos:
+            await step_context.context.send_activity("❌ Nenhum produto encontrado com esse nome.")
+            return await step_context.end_dialog()
 
-        try:
-            response = requests.get(endpoint)
+        mensagens = []
+        for produto in produtos[:3]:  # Mostra no máximo 3 resultados
+            mensagens.append(
+                f"🔍 Produto:\n"
+                f"🆔 ID: {produto.get('id')}\n"
+                f"📦 Nome: {produto.get('productName')}\n"
+                f"💰 Preço: R$ {produto.get('price')}\n"
+                f"📄 Descrição: {produto.get('productDescription')}\n"
+                f"----------------------"
+            )
+        await step_context.context.send_activity(MessageFactory.text("\n\n".join(mensagens)))
 
-            if response.status_code == 200:
-                produto = response.json()
-                resposta = (
-                    f"🔍 Produto encontrado:\n\n"
-                    f"🆔 ID: {produto.get('id')}\n"
-                    f"📦 Nome: {produto.get('productName')}\n"
-                    f"💰 Preço: R$ {produto.get('price')}\n"
-                    f"📄 Descrição: {produto.get('productDescription')}\n"
-                )
-            elif response.status_code == 404:
-                resposta = "❌ Produto não encontrado. Verifique o ID e tente novamente."
-            else:
-                resposta = f"⚠️ Erro ao consultar produto: {response.status_code}"
-
-        except Exception as e:
-            resposta = f"❌ Erro ao conectar com o serviço: {str(e)}"
-
-        await step_context.context.send_activity(MessageFactory.text(resposta))
         return await step_context.end_dialog()
+

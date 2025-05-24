@@ -1,4 +1,4 @@
-# bot/app.py
+
 import asyncio
 from aiohttp import web
 from botbuilder.core import (
@@ -12,6 +12,9 @@ from botbuilder.schema import Activity, ActivityTypes
 
 from bots.dialog_bot import DialogBot
 from dialogs.main_dialog import MainDialog
+
+from dotenv import load_dotenv
+load_dotenv()
 
 # Configurações do Bot
 APP_ID = ""
