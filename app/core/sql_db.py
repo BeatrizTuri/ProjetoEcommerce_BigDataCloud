@@ -10,9 +10,9 @@ CERT_PATH = os.path.join(BASE_DIR, "..", "certs", "DigiCertGlobalRootCA.crt.pem"
 
 engine = create_engine(
     DATABASE_URL,
-    connect_args={
-        "ssl": {"ca": CERT_PATH}
-    }
+    # connect_args={
+    #     "ssl": {"ca": CERT_PATH}
+    # }
 )
 
 
