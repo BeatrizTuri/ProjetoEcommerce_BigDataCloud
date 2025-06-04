@@ -3,7 +3,7 @@ from typing import List
 from pytest import Session
 from app.api.routes.cartao import get_db
 from app.schemas.pedido import PedidoCreate, PedidoResponse
-from app.services.cosmos_pedido import create_pedido, get_pedido_by_id, list_pedidos, delete_pedido_by_id
+from app.services.cosmos_pedido import create_pedido, get_pedido_by_id, list_pedidos, delete_pedido_by_id, list_pedidos_por_usuario
 
 router = APIRouter(prefix="/pedidos", tags=["Pedidos"])
 
@@ -22,10 +22,9 @@ def obter_pedido(id: str):
 
 @router.get("/", response_model=List[PedidoResponse])
 def obter_todos_pedidos(usuario_id: str = Query(None)):
-    pedidos = list_pedidos()
     if usuario_id:
-        pedidos = [p for p in pedidos if p.get("usuario_id") == usuario_id]
-    return pedidos
+        return list_pedidos_por_usuario(usuario_id)
+    return list_pedidos()
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def deletar_pedido(id: str):
