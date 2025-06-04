@@ -8,7 +8,7 @@ load_dotenv()
 class ProductAPI:
     def __init__(self):
         # Remove possível barra no final para evitar problemas em requests
-        self.base_url = os.getenv("PRODUCT_API_URL", "http://localhost:8000").rstrip("/")
+        self.base_url = os.getenv("API_URL", "http://localhost:8000").rstrip("/")
         
 
     def consultar_produtos(self, product_name: str):
