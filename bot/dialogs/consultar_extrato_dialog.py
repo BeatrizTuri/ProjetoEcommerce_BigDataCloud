@@ -16,7 +16,7 @@ class ConsultarExtratoDialog(ComponentDialog):
                 "ConsultarExtratoWaterfallDialog",
                 [
                     self.get_user_id_step,
-                    self.show_extrato_step
+                    self.show_extrato_step,
                 ],
             )
         )
@@ -37,10 +37,18 @@ class ConsultarExtratoDialog(ComponentDialog):
             await step_context.context.send_activity("❌ Nenhum extrato encontrado. Verifique o ID digitado.")
         else:
             mensagens = []
+            total_geral = 0
             for pedido in extrato:
+                valor = float(pedido.get("valor_total", 0))
+                total_geral += valor
+
                 mensagens.append(
-                    f"🛒 Pedido: {pedido.get('id')} | 💰 Total: R$ {pedido.get('valor_total')} | 📅 Data: {pedido.get('data')}"
+                    f"Pedido: {pedido.get('id')}\n"
+                    f"Total: R$ {valor:.2f}\n"
+                    f"Data: {pedido.get('data')}\n"
                 )
-            await step_context.context.send_activity("\n".join(mensagens))
+
+            mensagens.append(f"\n🧾 *Total geral*: R$ {total_geral:.2f}")
+            await step_context.context.send_activity(MessageFactory.text("\n".join(mensagens)))
 
         return await step_context.end_dialog("retornar_ao_menu")
