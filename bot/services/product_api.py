@@ -23,5 +23,18 @@ class ProductAPI:
         except Exception as e:
             print(f"Erro ao consultar produtos por nome: {e}")
             return []
+        
+    def consultar_extrato_compras(self, usuario_id: str):
+        try:
+            url = f"{self.base_url}/pedidos"
+            params = {"usuario_id": usuario_id}
+            response = requests.get(url, params=params)
+            if response.status_code == 404:
+                return []
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            print(f"Erro ao consultar pedidos: {e}")
+            return []
 
 

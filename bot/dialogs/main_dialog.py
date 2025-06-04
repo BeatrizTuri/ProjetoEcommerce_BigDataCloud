@@ -4,6 +4,7 @@ from botbuilder.dialogs.choices import Choice
 from botbuilder.core import MessageFactory
 from services.product_api import ProductAPI
 from dialogs.consultar_produtos_dialog import ConsultarProdutoDialog
+from dialogs.consultar_extrato_dialog import ConsultarExtratoDialog
 
 class MainDialog(ComponentDialog):
     def __init__(self):
@@ -15,6 +16,7 @@ class MainDialog(ComponentDialog):
         self.add_dialog(TextPrompt("TextPrompt"))
         # Passa a instância ao criar o diálogo
         self.add_dialog(ConsultarProdutoDialog(self.product_api))
+        self.add_dialog(ConsultarExtratoDialog(self.product_api))
 
         self.add_dialog(
             WaterfallDialog(
@@ -33,7 +35,8 @@ class MainDialog(ComponentDialog):
             ChoicePrompt.__name__,
             PromptOptions(
                 prompt=MessageFactory.text("Escolha a opção desejada:"),
-                choices=[Choice("Consultar Produtos")],
+                choices=[Choice("Consultar Produtos"),
+                    Choice("Ver Extrato de Compra")],
             ),
         )
 
@@ -41,6 +44,8 @@ class MainDialog(ComponentDialog):
         choice = step_context.result.value
         if choice == "Consultar Produtos":
             return await step_context.begin_dialog("ConsultarProdutoDialog")
+        if choice == "Ver Extrato de Compra":
+            return await step_context.begin_dialog("ConsultarExtratoDialog")
         
     async def final_step(self, step_context: WaterfallStepContext):
         if step_context.result == "retornar_ao_menu":

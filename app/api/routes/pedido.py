@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import List
 from pytest import Session
 from app.api.routes.cartao import get_db
@@ -21,8 +21,11 @@ def obter_pedido(id: str):
     return pedido
 
 @router.get("/", response_model=List[PedidoResponse])
-def obter_todos_pedidos():
-    return list_pedidos()
+def obter_todos_pedidos(usuario_id: str = Query(None)):
+    pedidos = list_pedidos()
+    if usuario_id:
+        pedidos = [p for p in pedidos if p.get("usuario_id") == usuario_id]
+    return pedidos
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def deletar_pedido(id: str):
