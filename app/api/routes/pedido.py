@@ -13,6 +13,18 @@ def criar_novo_pedido(pedido: PedidoCreate, db: Session = Depends(get_db)):
     pedido_criado = create_pedido(pedido_dict, db=db)
     return pedido_criado
 
+@router.get("/search", response_model=List[PedidoResponse])
+def obter_pedidos_por_usuario(usuario_id: str = Query(...)):
+    pedidos = list_pedidos_por_usuario(usuario_id)
+
+    if not pedidos:
+        raise HTTPException(
+            status_code=404,
+            detail="Nenhum pedido encontrado para o ID informado."
+        )
+
+    return pedidos
+
 @router.get("/{id}", response_model=PedidoResponse)
 def obter_pedido(id: str):
     pedido = get_pedido_by_id(id)
@@ -21,9 +33,7 @@ def obter_pedido(id: str):
     return pedido
 
 @router.get("/", response_model=List[PedidoResponse])
-def obter_todos_pedidos(usuario_id: str = Query(None)):
-    if usuario_id:
-        return list_pedidos_por_usuario(usuario_id)
+def obter_todos_pedidos():
     return list_pedidos()
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -33,3 +43,7 @@ def deletar_pedido(id: str):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pedido não encontrado")
     delete_pedido_by_id(id)
     return None
+
+
+
+
