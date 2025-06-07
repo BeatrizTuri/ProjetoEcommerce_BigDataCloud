@@ -45,11 +45,11 @@ class ConsultarProdutoDialog(ComponentDialog):
         mensagens = []
         for produto in produtos[:3]:
             mensagens.append(
-                f"🔍 Produto:\n"
-                f"🆔 ID: {produto.get('id')}\n"
-                f"📦 Nome: {produto.get('productName')}\n"
-                f"💰 Preço: R$ {produto.get('price')}\n"
-                f"📄 Descrição: {produto.get('productDescription')}\n"
+                f"🔍 Produto:\n\n"
+                f"🆔 ID: {produto.get('id')}\n\n"
+                f"📦 Nome: {produto.get('productName')}\n\n"
+                f"💰 Preço: R$ {produto.get('price')}\n\n"
+                f"📄 Descrição: {produto.get('productDescription')}\n\n"
                 f"----------------------"
             )
         await step_context.context.send_activity(MessageFactory.text("\n\n".join(mensagens)))
