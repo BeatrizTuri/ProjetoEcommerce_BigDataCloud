@@ -26,6 +26,7 @@ def create_pedido(pedido: dict, db):
     valor_total = Decimal("0.0")
     data_pedido = datetime.now()
 
+
     usuario = db.query(Usuario).filter(Usuario.id == pedido["id_usuario"]).first()
     if not usuario:
         raise Exception("Usuário não encontrado.")
@@ -58,6 +59,7 @@ def create_pedido(pedido: dict, db):
 
         produtos_final.append({
             "id_produto": item["id_produto"],
+            "nome": produto_info["productName"],
             "quantidade": item["quantidade"],
             "categoria": produto_info["productCategory"],
             "preco_unitario": float(preco_unitario),

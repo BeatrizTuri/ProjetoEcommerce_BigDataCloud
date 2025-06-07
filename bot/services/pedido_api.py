@@ -45,3 +45,15 @@ class PedidoAPI:
         except Exception as e:
             print(f"Erro ao buscar ID por CPF: {e}")
             return None
+        
+    def consultar_pedido_por_id(self, pedido_id: str):
+        try:
+            url = f"{self.base_url}/pedidos/{pedido_id}"
+            response = requests.get(url)
+            if response.status_code == 404:
+                return None
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            print(f"Erro ao consultar pedido por ID: {e}")
+            return None
