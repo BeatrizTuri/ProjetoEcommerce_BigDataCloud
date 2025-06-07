@@ -1,6 +1,9 @@
 from pydantic import BaseModel, Field, validator
 from typing import List, Optional
 
+class FinalizarCarrinhoRequest(BaseModel):
+    cvv: Optional[str] = None
+
 class ItemCarrinho(BaseModel):
     id_produto: str
     quantidade: int = Field(..., gt=0, description="A quantidade deve ser maior que zero.")
