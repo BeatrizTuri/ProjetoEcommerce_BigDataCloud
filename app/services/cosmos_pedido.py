@@ -81,3 +81,9 @@ def list_pedidos():
 
 def delete_pedido_by_id(id: str):
     container.delete_item(item=id, partition_key=id)
+    
+def list_pedidos_por_usuario(usuario_id: str):
+    query = f"SELECT * FROM c WHERE c.id_usuario = '{usuario_id}'"
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+    return items
+
