@@ -5,16 +5,19 @@ from decimal import Decimal
 import uuid
 
 
+
+
 class CartaoResumo(BaseModel):
     numero_final: str
     validade: str
 
 class ItemPedidoBase(BaseModel):
     id_produto: str
+    nome: Optional[str] = None
     quantidade: int
     categoria: str
     data: datetime = Field(default_factory=datetime.now)
-
+    
 class ItemPedidoCreate(ItemPedidoBase):
     pass
 
