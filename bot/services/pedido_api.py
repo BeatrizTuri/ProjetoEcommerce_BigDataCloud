@@ -7,7 +7,7 @@ load_dotenv()
 
 class PedidoAPI:
     def __init__(self):
-        self.base_url = os.getenv("PRODUCT_API_URL", "http://localhost:8000").rstrip("/")
+        self.base_url = os.getenv("API_URL", "http://localhost:8000").rstrip("/")
         
     def consultar_pedido_por_cpf(self, cpf: str):
         try:
