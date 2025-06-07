@@ -48,6 +48,7 @@ def listar_cartoes(id_usuario: int, db: Session = Depends(get_db)):
     
     return usuario.cartoes
 
+
 @router.post("/autorizar", response_model=TransacaoResponse)
 def autorizar_transacao(id_usuario: int, requisicao: TransacaoRequest, db: Session = Depends(get_db)):
 
@@ -97,6 +98,17 @@ def autorizar_transacao(id_usuario: int, requisicao: TransacaoRequest, db: Sessi
         message="Compra autorizada",
         codigoAutorizacao=uuid4()
     )
+
+@router.get("/por-cpf/{cpf}", response_model=List[CartaoCreditoResponse])
+def listar_cartoes_por_cpf(cpf: str, db: Session = Depends(get_db)):
+    usuario = db.query(Usuario).filter(Usuario.cpf == cpf).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário com este CPF não encontrado")
+
+    if not usuario.cartoes:
+        raise HTTPException(status_code=404, detail="Nenhum cartão encontrado para este usuário")
+
+    return usuario.cartoes
     
 @router.patch("/{id_cartao}/saldo", response_model=CartaoCreditoResponse)
 def adicionar_saldo_cartao(id_usuario: int, id_cartao: int, dados_atualizacao: CartaoCreditoUpdateSaldo, db: Session = Depends(get_db)):
