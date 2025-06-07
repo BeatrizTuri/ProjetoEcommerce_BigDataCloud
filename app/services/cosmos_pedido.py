@@ -20,7 +20,7 @@ container = database.create_container_if_not_exists(
     partition_key=PartitionKey(path="/id")
 )
 
-def create_pedido(pedido: dict, db, cvv: str = None):
+def create_pedido(pedido: dict, db):
     pedido_id = pedido.get("id", str(uuid.uuid4()))
     produtos_final = []
     valor_total = Decimal("0.0")
