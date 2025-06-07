@@ -8,6 +8,7 @@ from services.pedido_api import PedidoAPI
 from dialogs.consultar_produtos_dialog import ConsultarProdutoDialog
 from dialogs.consultar_pedido_dialog import ConsultarPedidoDialog
 from dialogs.consultar_extrato_compras import ConsultarExtratoDialog
+from dialogs.consultar_pedido_por_id_dialog import ConsultarPedidoPorIdDialog
 
 class MainDialog(ComponentDialog):
     def __init__(self):
@@ -23,6 +24,7 @@ class MainDialog(ComponentDialog):
         self.add_dialog(ConsultarProdutoDialog(self.product_api))
         self.add_dialog(ConsultarPedidoDialog(self.pedido_api))
         self.add_dialog(ConsultarExtratoDialog(self.extrato_api))
+        self.add_dialog(ConsultarPedidoPorIdDialog(self.pedido_api))
 
         self.add_dialog(
             WaterfallDialog(
@@ -44,7 +46,8 @@ class MainDialog(ComponentDialog):
                 choices=[
                     Choice("Consultar Produtos"),
                     Choice("Ver Consulta de Pedidos"),
-                    Choice("Extrato de Compras")
+                    Choice("Extrato de Compras"),
+                    Choice("Consultar Pedido por ID")
                 ],
                 style=ListStyle.hero_card
         ),
@@ -59,6 +62,8 @@ class MainDialog(ComponentDialog):
             return await step_context.begin_dialog("ConsultarPedidoDialog")
         if choice == "Extrato de Compras":
             return await step_context.begin_dialog("ConsultarExtratoDialog")
+        if choice == "Consultar Pedido por ID":
+            return await step_context.begin_dialog("ConsultarPedidoPorIdDialog")
         
     async def final_step(self, step_context: WaterfallStepContext):
         if step_context.result == "retornar_ao_menu":
