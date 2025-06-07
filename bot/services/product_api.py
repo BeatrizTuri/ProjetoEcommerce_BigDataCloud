@@ -23,5 +23,7 @@ class ProductAPI:
         except Exception as e:
             print(f"Erro ao consultar produtos por nome: {e}")
             return []
+        
+    
 
 

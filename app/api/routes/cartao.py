@@ -9,6 +9,7 @@ from app.models.usuario import Usuario
 from app.schemas.cartao_credito import CartaoCreditoCreate, CartaoCreditoResponse
 from app.schemas.transacao import TransacaoRequest, TransacaoResponse
 from app.schemas.alterar_saldo import CartaoCreditoUpdateSaldo
+from app.services.cosmos_pedido import list_pedidos_por_usuario
 
 router = APIRouter(prefix="/cartao_de_credito/{id_usuario}", tags=["Cartão"])
 
@@ -47,6 +48,7 @@ def listar_cartoes(id_usuario: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nenhum cartão encontrado para este usuário")
     
     return usuario.cartoes
+
 
 @router.post("/autorizar", response_model=TransacaoResponse)
 def autorizar_transacao(id_usuario: int, requisicao: TransacaoRequest, db: Session = Depends(get_db)):
@@ -97,6 +99,17 @@ def autorizar_transacao(id_usuario: int, requisicao: TransacaoRequest, db: Sessi
         message="Compra autorizada",
         codigoAutorizacao=uuid4()
     )
+
+@router.get("/por-cpf/{cpf}", response_model=List[CartaoCreditoResponse])
+def listar_cartoes_por_cpf(cpf: str, db: Session = Depends(get_db)):
+    usuario = db.query(Usuario).filter(Usuario.cpf == cpf).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário com este CPF não encontrado")
+
+    if not usuario.cartoes:
+        raise HTTPException(status_code=404, detail="Nenhum cartão encontrado para este usuário")
+
+    return usuario.cartoes
     
 @router.patch("/{id_cartao}/saldo", response_model=CartaoCreditoResponse)
 def adicionar_saldo_cartao(id_usuario: int, id_cartao: int, dados_atualizacao: CartaoCreditoUpdateSaldo, db: Session = Depends(get_db)):
@@ -109,3 +122,59 @@ def adicionar_saldo_cartao(id_usuario: int, id_cartao: int, dados_atualizacao: C
     db.commit()
     db.refresh(cartao)
     return cartao
+
+
+@router.get("/extrato/{cpf}")
+def extrato_cartoes_por_cpf(cpf: str, db: Session = Depends(get_db)):
+    usuario = db.query(Usuario).filter(Usuario.cpf == cpf).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário com este CPF não encontrado")
+
+    cartoes = db.query(CartaoCredito).filter(CartaoCredito.id_usuario_cartao == usuario.id).all()
+    if not cartoes:
+        raise HTTPException(status_code=404, detail="Nenhum cartão encontrado para este usuário")
+
+    pedidos = list_pedidos_por_usuario(str(usuario.id))
+
+    # Monta o extrato: para cada cartão, os pedidos em que foi usado
+    extrato = []
+    for cartao in cartoes:
+        pedidos_cartao = [
+            pedido for pedido in pedidos
+            if pedido.get("id_cartao_utilizado") == cartao.id
+        ]
+        extrato.append({
+            "cartao_id": cartao.id,
+            "numero_final": cartao.numero[-4:],
+            "validade": cartao.dtExpiracao.strftime("%m/%Y"),
+            "pedidos": pedidos_cartao
+        })
+
+    return extrato
+
+
+@router.get("/extrato/{cpf}/cartao")
+def extrato_cartao_por_cvv(cpf: str, cvv: str, db: Session = Depends(get_db)):
+    usuario = db.query(Usuario).filter(Usuario.cpf == cpf).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário com este CPF não encontrado")
+
+    cartao = db.query(CartaoCredito).filter(
+        CartaoCredito.id_usuario_cartao == usuario.id,
+        CartaoCredito.cvv == cvv
+    ).first()
+    if not cartao:
+        raise HTTPException(status_code=404, detail="Cartão com esse CVV não encontrado para este usuário")
+
+    pedidos = list_pedidos_por_usuario(str(usuario.id))
+    pedidos_cartao = [
+        pedido for pedido in pedidos
+        if pedido.get("id_cartao_utilizado") == cartao.id
+    ]
+
+    return {
+        "cartao_id": cartao.id,
+        "numero_final": cartao.numero[-4:],
+        "validade": cartao.dtExpiracao.strftime("%m/%Y"),
+        "pedidos": pedidos_cartao
+    }

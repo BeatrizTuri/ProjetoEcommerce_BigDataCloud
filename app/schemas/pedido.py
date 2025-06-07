@@ -1,8 +1,13 @@
 from datetime import datetime
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 from decimal import Decimal
 import uuid
+
+
+class CartaoResumo(BaseModel):
+    numero_final: str
+    validade: str
 
 class ItemPedidoBase(BaseModel):
     id_produto: str
@@ -19,6 +24,7 @@ class ItemPedidoResponse(ItemPedidoBase):
 class PedidoBase(BaseModel):
     id_usuario: str
     produtos: List[ItemPedidoCreate]
+    cvv: Optional[str] = None
 
     def to_dict(self):
         return {**self.model_dump(), "id": str(uuid.uuid4())}
@@ -31,6 +37,9 @@ class PedidoResponse(PedidoBase):
     valor_total: Decimal
     status: str = "pendente"
     produtos: List[ItemPedidoResponse]
+    id_cartao_utilizado: int
+    cvv: Optional[str] = None
+    cartao_utilizado: CartaoResumo
 
     class Config:
         from_attributes = True

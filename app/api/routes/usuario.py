@@ -22,6 +22,14 @@ def obter_usuarios(db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nenhum usuário encontrado")
     return usuarios
 
+
+@router.get("/buscar-id-por-cpf")
+def buscar_id_por_cpf(cpf: str, db: Session = Depends(get_db)):
+    usuario = db.query(Usuario).filter(Usuario.cpf == cpf).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado com esse CPF.")
+    return {"id_usuario": usuario.id}
+
 @router.get("/{id}", response_model=UsuarioResponse)
 def obter_usuario_por_id(id: int, db: Session = Depends(get_db)):
     usuario = db.query(Usuario).filter(Usuario.id == id).first()
