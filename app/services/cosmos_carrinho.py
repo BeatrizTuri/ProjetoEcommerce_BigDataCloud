@@ -88,7 +88,7 @@ def clear_cart(id_usuario: str):
     save_cart(cart)
     return cart
 
-def finalize_cart(id_usuario: str, db):
+def finalize_cart(id_usuario: str, db, cvv: str = None):
     from app.services.cosmos_pedido import create_pedido
     cart = get_cart(id_usuario)
 
@@ -99,6 +99,8 @@ def finalize_cart(id_usuario: str, db):
         "id_usuario": id_usuario,
         "produtos": cart["produtos"]
     }
+    if cvv:
+        pedido["cvv"] = cvv  # Adiciona o cvv se informado
 
     pedido_finalizado = create_pedido(pedido, db=db)
 

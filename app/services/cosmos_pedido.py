@@ -20,7 +20,7 @@ container = database.create_container_if_not_exists(
     partition_key=PartitionKey(path="/id")
 )
 
-def create_pedido(pedido: dict, db):
+def create_pedido(pedido: dict, db, cvv: str = None):
     pedido_id = pedido.get("id", str(uuid.uuid4()))
     produtos_final = []
     valor_total = Decimal("0.0")
@@ -29,10 +29,24 @@ def create_pedido(pedido: dict, db):
     usuario = db.query(Usuario).filter(Usuario.id == pedido["id_usuario"]).first()
     if not usuario:
         raise Exception("Usuário não encontrado.")
+    
+    cvv = pedido.get("cvv")
+    if cvv:
+        cartao = db.query(CartaoCredito).filter(
+            CartaoCredito.id_usuario_cartao == pedido["id_usuario"],
+            CartaoCredito.cvv == cvv
+        ).first()
 
-    cartao = db.query(CartaoCredito).filter(CartaoCredito.id_usuario_cartao == pedido["id_usuario"]).first()
-    if not cartao:
-        raise Exception("Cartão de crédito do usuário não encontrado.")
+        if not cartao:
+            raise Exception("Cartão de crédito com o CVV informado não encontrado.")
+    else:
+        cartao = db.query(CartaoCredito).filter(
+            CartaoCredito.id_usuario_cartao == pedido["id_usuario"]
+        ).order_by(CartaoCredito.saldo.desc()).first()
+
+        if not cartao:
+            raise Exception("Nenhum cartão de crédito encontrado para o usuário.")
+        
 
     for item in pedido["produtos"]:
         produto_info = obter_produto_por_id(item["id_produto"])
@@ -61,6 +75,11 @@ def create_pedido(pedido: dict, db):
     pedido_completo = {
         "id": pedido_id,
         "id_usuario": pedido["id_usuario"],
+        "id_cartao_utilizado": cartao.id, 
+        "cartao_utilizado": {
+            "numero_final": cartao.numero[-4:],
+            "validade": cartao.dtExpiracao.strftime("%m/%Y")
+        },
         "produtos": produtos_final,
         "valor_total": float(valor_total),
         "status": "confirmado",
@@ -77,7 +96,10 @@ def get_pedido_by_id(id: str):
         return None
 
 def list_pedidos():
-    return list(container.read_all_items())
+    pedidos = list(container.read_all_items())
+    for pedido in pedidos:
+        pedido.pop("cvv", None)
+    return pedidos
 
 def delete_pedido_by_id(id: str):
     container.delete_item(item=id, partition_key=id)
