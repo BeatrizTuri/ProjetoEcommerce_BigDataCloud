@@ -2,6 +2,7 @@ from botbuilder.dialogs import (
     ComponentDialog, WaterfallDialog, WaterfallStepContext,
     DialogTurnResult, TextPrompt, ConfirmPrompt, PromptOptions, ChoicePrompt, DialogTurnStatus
 )
+from botbuilder.schema import HeroCard, CardAction, ActionTypes, Attachment
 from botbuilder.core import MessageFactory
 from botbuilder.dialogs.choices import Choice
 from services.product_api import ProductAPI
@@ -64,35 +65,57 @@ class CompraDialog(ComponentDialog):
                 PromptOptions(prompt=MessageFactory.text("Qual produto deseja comprar? (Digite parte do nome)"))
             )
     
-    # Novo método para mostrar opções e escolher produto
     async def escolher_produto_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         nome_produto = step_context.result
         produtos = self.product_api.consultar_produtos(nome_produto)
         if not produtos:
             await step_context.context.send_activity("Nenhum produto encontrado com esse nome.")
             return await step_context.end_dialog()
-        # Monta opções para o usuário escolher
-        opcoes = []
+
+        # Monta os Hero Cards
+        attachments = []
         for p in produtos[:5]:
-            c = Choice(f"{p['productName']} (R$ {p['price']})")
-            c.value = p["id"]
-            opcoes.append(c)
-        step_context.values["produtos_encontrados"] = produtos
-        return await step_context.prompt(
-            ChoicePrompt.__name__,
-            PromptOptions(
-                prompt=MessageFactory.text("Escolha o produto desejado:"),
-                choices=opcoes
+            card = HeroCard(
+                title=p.get("productName", "Sem nome"),
+                subtitle=f"R$ {p.get('price', '0.00')}",
+                text=p.get("productDescription", "Sem descrição"),
+                buttons=[
+                    CardAction(
+                        type=ActionTypes.im_back,
+                        title="Selecionar",
+                        value=p["id"]
+                    )
+                ]
             )
+            attachments.append(Attachment(content_type="application/vnd.microsoft.card.hero", content=card))
+
+        await step_context.context.send_activity(
+            MessageFactory.carousel(attachments, "Produtos encontrados:")
+        )
+
+        step_context.values["produtos_encontrados"] = produtos
+        # Agora, aguarda o usuário clicar em um botão (que envia o id do produto)
+        return await step_context.prompt(
+            TextPrompt.__name__,
+            PromptOptions(prompt=MessageFactory.text("Clique em 'Selecionar' no produto desejado ou digite o ID do produto:"))
         )
     async def get_quantidade_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
-        produto_id = step_context.result.value
+        produto_id = step_context.result.strip()
         produtos = step_context.values["produtos_encontrados"]
         produto = next((p for p in produtos if p["id"] == produto_id), None)
         if not produto:
             await step_context.context.send_activity("Produto não encontrado na lista.")
             return await step_context.end_dialog()
         step_context.values["produto"] = produto
+
+        mensagem = (
+            f"Produto selecionado:\n"
+            f"Nome: {produto['productName']}\n"
+            f"Preço: R$ {produto['price']}\n"
+            f"Descrição: {produto.get('productDescription', 'Sem descrição')}"
+        )
+        await step_context.context.send_activity(mensagem)
+
         return await step_context.prompt(
             TextPrompt.__name__,
             PromptOptions(prompt=MessageFactory.text("Qual a quantidade?"))
