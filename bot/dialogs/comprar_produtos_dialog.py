@@ -1,6 +1,6 @@
 from botbuilder.dialogs import (
     ComponentDialog, WaterfallDialog, WaterfallStepContext,
-    DialogTurnResult, TextPrompt, ConfirmPrompt, PromptOptions, ChoicePrompt
+    DialogTurnResult, TextPrompt, ConfirmPrompt, PromptOptions, ChoicePrompt, DialogTurnStatus
 )
 from botbuilder.core import MessageFactory
 from botbuilder.dialogs.choices import Choice
@@ -50,13 +50,19 @@ class CompraDialog(ComponentDialog):
         )
 
     async def get_produto_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
-        # Só salva o CPF se ainda não estiver salvo E o resultado não for None (evita sobrescrever com nome do produto)
         if "cpf" not in step_context.values and step_context.result:
             step_context.values["cpf"] = step_context.result
-        return await step_context.prompt(
-            TextPrompt.__name__,
-            PromptOptions(prompt=MessageFactory.text("Qual produto deseja comprar? (Digite parte do nome)"))
-        )
+            # Só pede o produto após salvar o CPF
+            return await step_context.prompt(
+                TextPrompt.__name__,
+                PromptOptions(prompt=MessageFactory.text("Qual produto deseja comprar? (Digite parte do nome)"))
+            )
+        # Se já tem CPF, sempre pede o produto
+        if "cpf" in step_context.values:
+            return await step_context.prompt(
+                TextPrompt.__name__,
+                PromptOptions(prompt=MessageFactory.text("Qual produto deseja comprar? (Digite parte do nome)"))
+            )
     
     # Novo método para mostrar opções e escolher produto
     async def escolher_produto_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
