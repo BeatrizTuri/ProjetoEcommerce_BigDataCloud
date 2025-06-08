@@ -8,6 +8,7 @@ from botbuilder.dialogs import (
     PromptOptions,
 )
 from botbuilder.core import MessageFactory
+from botbuilder.schema import HeroCard, CardImage, Attachment
 from services.product_api import ProductAPI
 
 class ConsultarProdutoDialog(ComponentDialog):
@@ -42,17 +43,25 @@ class ConsultarProdutoDialog(ComponentDialog):
             await step_context.context.send_activity("❌ Nenhum produto encontrado com esse nome.")
             return await step_context.next(None)
 
-        mensagens = []
+        attachments = []
         for produto in produtos[:3]:
-            mensagens.append(
-                f"🔍 Produto:\n\n"
-                f"🆔 ID: {produto.get('id')}\n\n"
-                f"📦 Nome: {produto.get('productName')}\n\n"
-                f"💰 Preço: R$ {produto.get('price')}\n\n"
-                f"📄 Descrição: {produto.get('productDescription')}\n\n"
-                f"----------------------"
+            images = []
+            # Se houver imagem, adiciona ao HeroCard
+            if produto.get("imageUrl"):
+                # imageUrl pode ser lista, pega a primeira imagem
+                url = produto["imageUrl"][0] if isinstance(produto["imageUrl"], list) else produto["imageUrl"]
+                images = [CardImage(url=url)]
+            card = HeroCard(
+                title=produto.get("productName", "Sem nome"),
+                subtitle=f"R$ {produto.get('price', '0.00')}",
+                text=produto.get("productDescription", "Sem descrição"),
+                images=images
             )
-        await step_context.context.send_activity(MessageFactory.text("\n\n".join(mensagens)))
+            attachments.append(Attachment(content_type="application/vnd.microsoft.card.hero", content=card))
+
+        await step_context.context.send_activity(
+            MessageFactory.carousel(attachments, "Produtos encontrados:")
+        )
         return await step_context.next(None)
 
     async def ask_repeat_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:

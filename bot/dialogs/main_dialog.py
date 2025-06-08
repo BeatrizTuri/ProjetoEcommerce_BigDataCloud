@@ -5,10 +5,12 @@ from botbuilder.core import MessageFactory
 from services.extrato_api import ExtratoAPI
 from services.product_api import ProductAPI
 from services.pedido_api import PedidoAPI
+from services.compra_api import CompraAPI
 from dialogs.consultar_produtos_dialog import ConsultarProdutoDialog
 from dialogs.consultar_pedido_dialog import ConsultarPedidoDialog
 from dialogs.consultar_extrato_compras import ConsultarExtratoDialog
 from dialogs.consultar_pedido_por_id_dialog import ConsultarPedidoPorIdDialog
+from dialogs.comprar_produtos_dialog import CompraDialog
 
 class MainDialog(ComponentDialog):
     def __init__(self):
@@ -16,6 +18,7 @@ class MainDialog(ComponentDialog):
         self.product_api = ProductAPI()  # Instancia a API uma vez
         self.pedido_api = PedidoAPI()
         self.extrato_api = ExtratoAPI()
+        self.compra_api = CompraAPI()
 
         self.add_dialog(ChoicePrompt("ChoicePrompt"))
 
@@ -25,6 +28,7 @@ class MainDialog(ComponentDialog):
         self.add_dialog(ConsultarPedidoDialog(self.pedido_api))
         self.add_dialog(ConsultarExtratoDialog(self.extrato_api))
         self.add_dialog(ConsultarPedidoPorIdDialog(self.pedido_api))
+        self.add_dialog(CompraDialog(self.product_api, self.extrato_api, self.compra_api))
 
         self.add_dialog(
             WaterfallDialog(
@@ -47,7 +51,8 @@ class MainDialog(ComponentDialog):
                     Choice("Consultar Produtos"),
                     Choice("Ver Consulta de Pedidos"),
                     Choice("Extrato de Compras"),
-                    Choice("Consultar Pedido por ID")
+                    Choice("Consultar Pedido por ID"),
+                    Choice("Comprar Produtos")
                 ],
                 style=ListStyle.hero_card
         ),
@@ -64,6 +69,8 @@ class MainDialog(ComponentDialog):
             return await step_context.begin_dialog("ConsultarExtratoDialog")
         if choice == "Consultar Pedido por ID":
             return await step_context.begin_dialog("ConsultarPedidoPorIdDialog")
+        if choice == "Comprar Produtos":
+            return await step_context.begin_dialog("CompraDialog")
         
     async def final_step(self, step_context: WaterfallStepContext):
         if step_context.result == "retornar_ao_menu":

@@ -16,4 +16,14 @@ class ExtratoAPI:
             return response.json()
         except Exception as e:
             print(f"Erro ao consultar extrato de cartões por CPF: {e}")
-            return []
+        return []
+
+    def buscar_usuario_por_cpf(self, cpf: str):
+        try:
+            url = f"{self.base_url}/usuarios/buscar-id-por-cpf?cpf={cpf}"
+            response = requests.get(url)
+            response.raise_for_status()
+            return response.json()  # Espera-se que retorne um dict com pelo menos o campo "id"
+        except Exception as e:
+            print(f"Erro ao buscar usuário por CPF: {e}")
+            return None
