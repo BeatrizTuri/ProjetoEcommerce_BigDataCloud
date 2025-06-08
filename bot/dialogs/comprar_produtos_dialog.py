@@ -2,7 +2,7 @@ from botbuilder.dialogs import (
     ComponentDialog, WaterfallDialog, WaterfallStepContext,
     DialogTurnResult, TextPrompt, ConfirmPrompt, PromptOptions, ChoicePrompt, DialogTurnStatus
 )
-from botbuilder.schema import HeroCard, CardAction, ActionTypes, Attachment
+from botbuilder.schema import HeroCard, CardAction, ActionTypes, Attachment, CardImage
 from botbuilder.core import MessageFactory
 from botbuilder.dialogs.choices import Choice
 from services.product_api import ProductAPI
@@ -72,13 +72,18 @@ class CompraDialog(ComponentDialog):
             await step_context.context.send_activity("Nenhum produto encontrado com esse nome.")
             return await step_context.end_dialog()
 
-        # Monta os Hero Cards
+        # Monta os Hero Cards com imagem, se disponível
         attachments = []
         for p in produtos[:5]:
+            images = []
+            if p.get("imageUrl"):
+                url = p["imageUrl"][0] if isinstance(p["imageUrl"], list) else p["imageUrl"]
+                images = [CardImage(url=url)]
             card = HeroCard(
                 title=p.get("productName", "Sem nome"),
                 subtitle=f"R$ {p.get('price', '0.00')}",
                 text=p.get("productDescription", "Sem descrição"),
+                images=images,
                 buttons=[
                     CardAction(
                         type=ActionTypes.im_back,
@@ -94,11 +99,12 @@ class CompraDialog(ComponentDialog):
         )
 
         step_context.values["produtos_encontrados"] = produtos
-        # Agora, aguarda o usuário clicar em um botão (que envia o id do produto)
+        # Aguarda o usuário clicar em um botão (que envia o id do produto)
         return await step_context.prompt(
             TextPrompt.__name__,
             PromptOptions(prompt=MessageFactory.text("Clique em 'Selecionar' no produto desejado ou digite o ID do produto:"))
         )
+    
     async def get_quantidade_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         produto_id = step_context.result.strip()
         produtos = step_context.values["produtos_encontrados"]
