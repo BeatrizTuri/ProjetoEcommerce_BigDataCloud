@@ -39,18 +39,32 @@ def obter_usuario_por_id(id: int, db: Session = Depends(get_db)):
 
 @router.post("/", response_model=UsuarioResponse, status_code=status.HTTP_201_CREATED)
 def criar_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
-    novo_usuario = Usuario(**usuario.model_dump(exclude={"cartao_credito"}))
-    db.add(novo_usuario)
-    db.commit()
-    db.refresh(novo_usuario)
+    try:
+        # Verifica se já existe usuário com o mesmo e-mail ou CPF
+        if db.query(Usuario).filter(Usuario.email == usuario.email).first():
+            raise HTTPException(status_code=400, detail="E-mail já cadastrado.")
+        if db.query(Usuario).filter(Usuario.cpf == usuario.cpf).first():
+            raise HTTPException(status_code=400, detail="CPF já cadastrado.")
+
+        novo_usuario = Usuario(**usuario.model_dump(exclude={"cartao_credito"}))
+        db.add(novo_usuario)
+        db.commit()
+        db.refresh(novo_usuario)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Erro ao criar usuário: {str(e)}")
 
     if usuario.cartao_credito:
-        novo_cartao = CartaoCredito(
-            **usuario.cartao_credito.model_dump(),
-            id_usuario_cartao=novo_usuario.id
-        )
-        db.add(novo_cartao)
-    db.commit()
+        try:
+            novo_cartao = CartaoCredito(
+                **usuario.cartao_credito.model_dump(),
+                id_usuario_cartao=novo_usuario.id
+            )
+            db.add(novo_cartao)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=400, detail=f"Usuário criado, mas erro ao cadastrar cartão: {str(e)}")
 
     return novo_usuario
 
