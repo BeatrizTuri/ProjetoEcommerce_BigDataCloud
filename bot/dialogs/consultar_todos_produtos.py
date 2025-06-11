@@ -36,7 +36,7 @@ class ConsultarTodosProdutosDialog(ComponentDialog):
             return await step_context.next(None)
 
         attachments = []
-        for produto in produtos[:10]:
+        for produto in produtos:
             images = []
             if produto.get("imageUrl"):
                 url = produto["imageUrl"][0] if isinstance(produto["imageUrl"], list) else produto["imageUrl"]
