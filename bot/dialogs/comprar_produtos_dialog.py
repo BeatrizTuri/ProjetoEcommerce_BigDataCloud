@@ -70,9 +70,9 @@ class CompraDialog(ComponentDialog):
         produtos = self.product_api.consultar_produtos(nome_produto)
         if not produtos:
             await step_context.context.send_activity("Nenhum produto encontrado com esse nome.")
-            return await step_context.end_dialog()
+            # Permite buscar outro produto sem encerrar o diálogo
+            return await step_context.replace_dialog(self.id, {"cpf": step_context.values.get("cpf")})
 
-        # Monta os Hero Cards com imagem, se disponível
         attachments = []
         for p in produtos[:5]:
             images = []
@@ -94,30 +94,46 @@ class CompraDialog(ComponentDialog):
             )
             attachments.append(Attachment(content_type="application/vnd.microsoft.card.hero", content=card))
 
+        # Adiciona botão para buscar outro produto
+        outro_card = HeroCard(
+            title="Buscar outro produto",
+            buttons=[
+                CardAction(
+                    type=ActionTypes.im_back,
+                    title="Buscar outro produto",
+                    value="BUSCAR_OUTRO"
+                )
+            ]
+        )
+        attachments.append(Attachment(content_type="application/vnd.microsoft.card.hero", content=outro_card))
+
         await step_context.context.send_activity(
             MessageFactory.carousel(attachments, "Produtos encontrados:")
         )
 
         step_context.values["produtos_encontrados"] = produtos
-        # Aguarda o usuário clicar em um botão (que envia o id do produto)
         return await step_context.prompt(
             TextPrompt.__name__,
-            PromptOptions(prompt=MessageFactory.text("Clique em 'Selecionar' no produto desejado ou digite o ID do produto:"))
+            PromptOptions(prompt=MessageFactory.text("Clique em 'Selecionar' ou em 'Buscar outro produto'."))
         )
-    
+
     async def get_quantidade_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         produto_id = step_context.result.strip()
+        if produto_id == "BUSCAR_OUTRO":
+            # Volta para busca de produto
+            return await step_context.replace_dialog(self.id, {"cpf": step_context.values.get("cpf")})
+
         produtos = step_context.values["produtos_encontrados"]
         produto = next((p for p in produtos if p["id"] == produto_id), None)
         if not produto:
             await step_context.context.send_activity("Produto não encontrado na lista.")
-            return await step_context.end_dialog()
+            return await step_context.replace_dialog(self.id, {"cpf": step_context.values.get("cpf")})
         step_context.values["produto"] = produto
 
         mensagem = (
-            f"Produto selecionado:\n"
-            f"Nome: {produto['productName']}\n"
-            f"Preço: R$ {produto['price']}\n"
+            f"Produto selecionado:\n\n"
+            f"Nome: {produto['productName']}\n\n"
+            f"Preço: R$ {produto['price']}\n\n"
             f"Descrição: {produto.get('productDescription', 'Sem descrição')}"
         )
         await step_context.context.send_activity(mensagem)
@@ -174,9 +190,10 @@ class CompraDialog(ComponentDialog):
         id_usuario = step_context.values["id_usuario"]
         cvv = step_context.values["cvv"]
         pedido = self.compra_api.finalizar_carrinho(id_usuario, cvv)
-        if not pedido:
-            await step_context.context.send_activity("Erro ao finalizar a compra.")
-            return await step_context.end_dialog()
+        if not pedido or pedido.get("erro"):
+            erro_msg = pedido.get("erro") if pedido else "Erro ao finalizar a compra."
+            await step_context.context.send_activity(f"Erro ao finalizar a compra: {erro_msg}")
+            return await step_context.end_dialog("retornar_ao_menu")
         resumo = f"Compra finalizada!\n\nValor total: R$ {pedido['valor_total']:.2f}\n\nStatus: {pedido['status']}"
         await step_context.context.send_activity(resumo)
         return await step_context.end_dialog("retornar_ao_menu")

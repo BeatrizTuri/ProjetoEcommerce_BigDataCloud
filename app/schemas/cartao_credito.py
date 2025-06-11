@@ -22,8 +22,10 @@ class CartaoCreditoBase(BaseModel):
     def numero_deve_ser_valido(cls, value: str) ->str:
         if len(value) != 16:
             print("Numero do cartão deve ter exatamente 16 dígitos.")
+            raise ValueError("Numero do cartão deve ter exatamente 16 dígitos.")
         if not value.isdigit():
             print("O numero do cartão deve conter apenas dígitos.")
+            raise ValueError("O numero do cartão deve conter apenas dígitos.")
         return value
 
 class CartaoCreditoCreate(CartaoCreditoBase):

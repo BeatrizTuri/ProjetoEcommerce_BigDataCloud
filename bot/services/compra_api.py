@@ -25,6 +25,12 @@ class CompraAPI:
             response = requests.post(url, json=payload)
             response.raise_for_status()
             return response.json()
+        except requests.exceptions.HTTPError as e:
+            try:
+                # Tenta extrair mensagem detalhada do backend
+                return {"erro": response.json().get("detail", str(e))}
+            except Exception:
+                return {"erro": str(e)}
         except Exception as e:
             print(f"Erro ao finalizar o carrinho: {e}")
-            return None
+            return {"erro": str(e)}
