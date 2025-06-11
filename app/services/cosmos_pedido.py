@@ -6,6 +6,7 @@ from decimal import Decimal
 from app.services.cosmos_product import obter_produto_por_id
 from app.models.cartao_credito import CartaoCredito
 from app.models.usuario import Usuario
+from app.utils.cartao_utils import autorizar_cartao_compra
 from app.core.cosmos_db import (
     COSMOS_URI,
     COSMOS_KEY,
@@ -68,8 +69,9 @@ def create_pedido(pedido: dict, db):
 
         valor_total += subtotal
 
-    if cartao.saldo < valor_total:
-        raise Exception("Saldo insuficiente no cartão de crédito.")
+    autorizado, mensagem = autorizar_cartao_compra(cartao, valor_total)
+    if not autorizado:
+        raise Exception(mensagem)
 
     cartao.saldo -= valor_total
     db.commit()
