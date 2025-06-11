@@ -23,7 +23,16 @@ class ExtratoAPI:
             url = f"{self.base_url}/usuarios/buscar-id-por-cpf?cpf={cpf}"
             response = requests.get(url)
             response.raise_for_status()
-            return response.json()  # Espera-se que retorne um dict com pelo menos o campo "id"
+            data = response.json()
+            # Se não tiver id_usuario, retorna erros
+            if "id_usuario" not in data:
+                return {"erro": data.get("detail", "Usuário não encontrado.")}
+            return data
+        except requests.exceptions.HTTPError as e:
+            try:
+                return {"erro": response.json().get("detail", str(e))}
+            except Exception:
+                return {"erro": str(e)}
         except Exception as e:
             print(f"Erro ao buscar usuário por CPF: {e}")
-            return None
+            return {"erro": str(e)}

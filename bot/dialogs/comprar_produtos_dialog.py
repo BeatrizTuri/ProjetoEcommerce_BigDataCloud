@@ -24,6 +24,7 @@ class CompraDialog(ComponentDialog):
                 "CompraWaterfallDialog",
                 [
                     self.get_cpf_step,
+                    self.validar_cpf_step,
                     self.get_produto_step,
                     self.escolher_produto_step,  
                     self.get_quantidade_step,
@@ -49,6 +50,22 @@ class CompraDialog(ComponentDialog):
             TextPrompt.__name__,
             PromptOptions(prompt=MessageFactory.text("Digite o CPF do usuário para iniciar a compra:"))
         )
+    
+    async def validar_cpf_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
+        cpf = step_context.values.get("cpf") or (step_context.result.strip() if step_context.result else None)
+        if not cpf:
+            await step_context.context.send_activity("CPF não informado. Retornando ao menu.")
+            return await step_context.end_dialog("retornar_ao_menu")
+        
+        usuario = self.extrato_api.buscar_usuario_por_cpf(cpf)
+        if not usuario or usuario.get("erro") or "id_usuario" not in usuario:
+            erro_msg = usuario.get("erro", "Usuário não encontrado.") if usuario else "Usuário não encontrado."
+            await step_context.context.send_activity(f"Erro: {erro_msg}")
+            return await step_context.end_dialog("retornar_ao_menu")
+        
+        step_context.values["cpf"] = cpf
+        step_context.values["id_usuario"] = usuario["id_usuario"]
+        return await step_context.next(None)
 
     async def get_produto_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         if "cpf" not in step_context.values and step_context.result:
@@ -142,14 +159,17 @@ class CompraDialog(ComponentDialog):
             TextPrompt.__name__,
             PromptOptions(prompt=MessageFactory.text("Qual a quantidade?"))
         )
+    
     async def add_to_cart_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         step_context.values["quantidade"] = int(step_context.result)
         # Busca usuário pelo CPF para obter id_usuario
         cpf = step_context.values["cpf"]
         usuario = self.extrato_api.buscar_usuario_por_cpf(cpf)
-        if not usuario:
-            await step_context.context.send_activity("Usuário não encontrado.")
-            return await step_context.end_dialog()
+
+        if not usuario or usuario.get("erro"):
+            erro_msg = usuario.get("erro", "Usuário não encontrado.")if usuario else "Usuário não encontrado."
+            await step_context.context.send_activity(f"Erro: {erro_msg}")
+            return await step_context.end_dialog("retornar_ao_menu")
         id_usuario = usuario["id_usuario"]
         step_context.values["id_usuario"] = id_usuario
 
@@ -179,7 +199,7 @@ class CompraDialog(ComponentDialog):
     async def loop_or_cvv_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         return await step_context.prompt(
             TextPrompt.__name__,
-            PromptOptions(prompt=MessageFactory.text("Digite o CVV do cartão para finalizar (ou deixe em branco para usar o cartão padrão):"))
+            PromptOptions(prompt=MessageFactory.text("Digite o CVV do cartão para finalizar:"))
         )
 
     async def get_cvv_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
@@ -190,10 +210,12 @@ class CompraDialog(ComponentDialog):
         id_usuario = step_context.values["id_usuario"]
         cvv = step_context.values["cvv"]
         pedido = self.compra_api.finalizar_carrinho(id_usuario, cvv)
+
         if not pedido or pedido.get("erro"):
             erro_msg = pedido.get("erro") if pedido else "Erro ao finalizar a compra."
             await step_context.context.send_activity(f"Erro ao finalizar a compra: {erro_msg}")
             return await step_context.end_dialog("retornar_ao_menu")
+        
         resumo = f"Compra finalizada!\n\nValor total: R$ {pedido['valor_total']:.2f}\n\nStatus: {pedido['status']}"
         await step_context.context.send_activity(resumo)
         return await step_context.end_dialog("retornar_ao_menu")
