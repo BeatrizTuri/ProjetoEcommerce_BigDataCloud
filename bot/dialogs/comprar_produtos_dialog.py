@@ -159,6 +159,7 @@ class CompraDialog(ComponentDialog):
             TextPrompt.__name__,
             PromptOptions(prompt=MessageFactory.text("Qual a quantidade?"))
         )
+    
     async def add_to_cart_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         step_context.values["quantidade"] = int(step_context.result)
         # Busca usuário pelo CPF para obter id_usuario
@@ -198,7 +199,7 @@ class CompraDialog(ComponentDialog):
     async def loop_or_cvv_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         return await step_context.prompt(
             TextPrompt.__name__,
-            PromptOptions(prompt=MessageFactory.text("Digite o CVV do cartão para finalizar (ou deixe em branco para usar o cartão padrão):"))
+            PromptOptions(prompt=MessageFactory.text("Digite o CVV do cartão para finalizar:"))
         )
 
     async def get_cvv_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
