@@ -25,7 +25,7 @@ class CompraDialog(ComponentDialog):
                 [
                     self.get_cpf_step,
                     self.get_produto_step,
-                    self.escolher_produto_step,
+                    self.escolher_produto_step,  
                     self.get_quantidade_step,
                     self.add_to_cart_step,
                     self.ask_add_more_step,

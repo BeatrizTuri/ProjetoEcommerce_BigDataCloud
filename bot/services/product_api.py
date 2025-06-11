@@ -23,7 +23,20 @@ class ProductAPI:
         except Exception as e:
             print(f"Erro ao consultar produtos por nome: {e}")
             return []
-        
-    
+
+    def consultar_todos_produtos(self):
+        """Consulta todos os produtos cadastrados na API."""
+        try:
+            url = f"{self.base_url}/produtos/"
+            response = requests.get(url)
+            if response.status_code == 404:
+                return []
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            print(f"Erro ao consultar todos os produtos: {e}")
+            return []
+
+
 
 
